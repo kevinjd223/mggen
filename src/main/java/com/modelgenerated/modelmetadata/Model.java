@@ -11,7 +11,6 @@ import com.modelgenerated.foundation.debug.Displayable;
 import com.modelgenerated.foundation.debug.DisplayBuffer;
 import com.modelgenerated.modelmetadata.enums.EnumDescriptor;
 import com.modelgenerated.modelmetadata.service.ServiceDescriptor;
-import com.modelgenerated.modelmetadata.uimodel.ScreenDescriptor;
 import com.modelgenerated.util.Assert;
 import java.util.Collection;
 import java.util.Iterator;
@@ -29,7 +28,6 @@ public class Model implements Displayable {
     private Map<String, ObjectDescriptor> objects = new HashMap<String, ObjectDescriptor>();
     private Map<String, ObjectDescriptor> externalObjects = new HashMap<String, ObjectDescriptor>();
     private Map<String, EnumDescriptor> enums = new HashMap<String, EnumDescriptor>();
-    private Map<String, ScreenDescriptor> screens = new HashMap<String, ScreenDescriptor>();
     private Map<String, ServiceDescriptor> services = new HashMap<String, ServiceDescriptor>();
 
     /** Creates a new instance of ValueObjectDescription */
@@ -133,30 +131,8 @@ public class Model implements Displayable {
         enums = newEnums;
     }
     */
-    
-    /**
-     * Adds a Screen to the Model. 
-     * @param enumDescriptor
-     */
-    public void addScreen(ScreenDescriptor screenDescriptor) {
-    	Assert.check(screenDescriptor != null, "screenDescriptor != null");
-    	
-        String controllerClassName = screenDescriptor.getControllerClass();
-    	Assert.check(controllerClassName != null, "controllerClassName != null");
-    	
-    	ScreenDescriptor previous = screens.put(controllerClassName, screenDescriptor); 
 
-        Assert.check(previous == null, "Duplicate Screen \"" + controllerClassName + "\" found in Model");
-    }
-    public Map<String, ScreenDescriptor> getScreens() {
-        return screens;
-    }
-    /*
-    public void setScreens(Map<String, ScreenDescriptor> newScreens) {
-        screens = newScreens;
-    }
-    */
-    
+
     public void addService(ServiceDescriptor serviceDescriptor) {
     	Assert.check(serviceDescriptor != null, "serviceDescriptor != null");
     	
@@ -199,11 +175,6 @@ public class Model implements Displayable {
         displayBuffer.append("Objects:");
         for (ObjectDescriptor objectDescriptor : objects.values()) {
             displayBuffer.append(objectDescriptor.display("", level+1, maxLevels, displayedObjects));
-        }
-        
-        displayBuffer.append("Screens:");
-        for (ScreenDescriptor screenDescriptor : screens.values()) {
-            displayBuffer.append(screenDescriptor.display("", level+1, maxLevels, displayedObjects));
         }
         
         displayBuffer.append("Services:");

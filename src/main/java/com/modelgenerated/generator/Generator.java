@@ -28,11 +28,9 @@ import com.modelgenerated.generator.dataaccessgenerator.ValueObjectGenerator;
 import com.modelgenerated.generator.dataaccessgenerator.ValueObjectListInterfaceGenerator;
 import com.modelgenerated.generator.dataaccessgenerator.ValueObjectListGenerator;
 import com.modelgenerated.generator.servicegenerator.ServiceGenerator;
-import com.modelgenerated.generator.strutsgenerator.ScreenGenerator;
 import com.modelgenerated.modelmetadata.ObjectDescriptor;
 import com.modelgenerated.modelmetadata.Model;
 import com.modelgenerated.modelmetadata.enums.EnumDescriptor;
-import com.modelgenerated.modelmetadata.uimodel.ScreenDescriptor;
 import com.modelgenerated.modelmetadata.service.ServiceDescriptor;
 import com.modelgenerated.modelmetadata.xml.ModelParser;
 import com.modelgenerated.tools.EnvironmentPrinter;
@@ -115,8 +113,6 @@ public class Generator {
             ObjectFieldSizeGenerator objectFieldSizeGenerator = new ObjectFieldSizeGenerator();
             objectFieldSizeGenerator.generate(model, objectSizePath);
             
-            generateUI(eventListener, model);
-
             generateServices(eventListener, model);
              
             generateEnums(eventListener, model, javaRoot);
@@ -165,22 +161,6 @@ public class Generator {
             ObjectDescriptor objectDescriptor = (ObjectDescriptor)i.next();
             
             codeGenerator.generate(targetRoot, objectDescriptor);            
-        }       
-    }
-    
-    private static void generateUI(GeneratorEventListener eventListener, Model model) {
-        Map screenMap = model.getScreens();
-        
-        ScreenGenerator screenGenerator = new ScreenGenerator();
-        
-        Iterator i = screenMap.values().iterator();
-        while (i.hasNext()) {
-            ScreenDescriptor screenDescriptor = (ScreenDescriptor)i.next();
-            
-            if (screenDescriptor.getShouldGenerate()) {
-                screenGenerator.generate(model, screenDescriptor);            
-            }
-            
         }       
     }
     
