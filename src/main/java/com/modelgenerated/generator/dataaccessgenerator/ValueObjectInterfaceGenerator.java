@@ -25,8 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- *
- * @author  kevind
+ * Generates value object interfaces.  
  */
 public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
    
@@ -122,11 +121,13 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
         
     }
 
+    @Override
     protected void generateClassJavaDocs() {
         code.addLine();
         CommentGenerator.writeJavaDocComment(code, "", objectDescriptor.getDescription());
     }
     
+    @Override
     protected void generateClass() {
         code.addLine();
         code.add("public interface " + getClassName() + " extends ValueObject, Displayable");
@@ -173,9 +174,17 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
                 } else if (field.getType() == FieldTypeEnum.COALESCE) {
                     //String joinFieldName = field.getJoinField();
                     //FieldDescriptor joinField = objectDescriptor.findField(joinFieldName);
-                    columnReference = "\"" + field.getName() + "\"";
+                    columnReference = "\"" + field.getName() + "\"";                
                 }
-                code.addLine("    FieldAttribute ATTRIB_" + fieldName.toUpperCase() + " = new FieldAttribute(\"" + fieldName + "\", " + columnReference + ");");
+                int length = field.getType() == FieldTypeEnum.STRING ? field.getSize() : 0;
+                
+                StringBuilder str = new StringBuilder();
+                str.append("    FieldAttribute ATTRIB_").append(fieldName.toUpperCase());
+                str.append(" = new FieldAttribute(\"").append(fieldName).append("\", ");  
+                str.append(columnReference).append(", ");  
+                str.append(length).append(");");  
+
+                code.addLine(str.toString());  
             } 
         }
     }
@@ -247,6 +256,7 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
         }
     }
     
+    @Override
     protected String getFullyQualifiedName() {
         return objectDescriptor.getValueObjectInterface().getFQN();
     }

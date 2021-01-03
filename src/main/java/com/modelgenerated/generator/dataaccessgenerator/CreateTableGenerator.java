@@ -168,7 +168,7 @@ public abstract class CreateTableGenerator implements CodeGenerator {
                 // do nothing
             } else if (field.getType() == FieldTypeEnum.ENUM) {
                 commaIfNeeded(fieldCount++);
-                code.add("    " + field.getColumnName() + " varchar(30)");
+                code.add("    " + field.getColumnName() + " varchar(50)");
             } else {
                 Assert.check(false, "Unknown ");
             }

@@ -128,6 +128,7 @@ abstract class JavaCodeBaseGenerator implements CodeGenerator {
     
     /**
      *  Converts a fully qualified class name to classname by removing the package name.
+     *  TODO: should be static or private??
      */
     public String fullyQualifiedNameToClassName(String fqn) {
         return fqn.substring(fqn.lastIndexOf(".")+1);
