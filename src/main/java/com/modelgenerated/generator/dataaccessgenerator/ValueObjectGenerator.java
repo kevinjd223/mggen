@@ -393,7 +393,11 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
         if (objectDescriptor.getPersisted()) {
             code.addLine("        if (" + variableName + " == null) {");
             code.addLine("            if (isNew) {");
-            code.addLine("                " + variableName + " = (" + referenceClassType + ")Factory.createObject(" + referenceClassType + ".class);");
+            if (reference.getType() == ReferenceTypeEnum.ONE_TO_ONE) {
+                code.addLine("                // do nothing");
+            } else {
+                code.addLine("                " + variableName + " = (" + referenceClassType + ")Factory.createObject(" + referenceClassType + ".class);");
+            }
             code.addLine("            } else if (getIsJITLoadingEnabled()) {");
             // Example: LookupDataDAO lookupDataDAO = (LookupDataDAO)DataAccessLocator.findDAO("com.modelgenerated.lookup.LookupData");
             code.addLine("                " + daoInterface + " " + daoVariableName + " = (" + daoInterface + ")DataAccessLocator.findDAO(\"" + reference.getTargetClass().getFQN() + "\");");                
