@@ -10,59 +10,63 @@ package com.modelgenerated.modelmetadata;
 import com.modelgenerated.foundation.debug.Displayable;
 import com.modelgenerated.foundation.debug.DisplayBuffer;
 import com.modelgenerated.util.Assert;
+import com.modelgenerated.util.StringUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
 
 /**
- *
+ * Describes to reference from one object to another.
+ * Could be one to one or one to many depending on ReferenceTypeEnum.
  * @author  kevind
  */
-public class ReferenceDescriptor implements Displayable {
-    private ObjectDescriptor parentObject;
-    private String name;
-    private String description;
-    private ClassDescriptor classDescriptor; 
-    private ReferenceTypeEnum type; 
-    private ClassDescriptor targetClass; 
-    private String targetMethod; 
-    private ClassDescriptor searchCriteria; 
+public class ReferenceDescriptor {
+    private final ObjectDescriptor parentObject;
+    private final String name;
+    private final String description;
+    private final ReferenceTypeEnum type;
+    private final ClassDescriptor classDescriptor;
+    private final ClassDescriptor targetClass;
+    private final String targetMethod;
+    private final ClassDescriptor searchCriteria;
     
     
-    /** Creates a new instance of FieldDescriptor */
-    public ReferenceDescriptor(ObjectDescriptor parentObject) {
+    /** Creates a new instance of ReferenceDescriptor */
+    public ReferenceDescriptor(ObjectDescriptor parentObject,
+                               String name,
+                               String description,
+                               ReferenceTypeEnum type,
+                               ClassDescriptor classDescriptor,
+                               ClassDescriptor targetClass,
+                               String targetMethod,
+                               ClassDescriptor searchCriteria) {
         Assert.check(parentObject != null, "parentObject != null");
         this.parentObject = parentObject;
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.classDescriptor = classDescriptor;
+        this.targetClass = targetClass;
+        this.targetMethod = targetMethod;
+        this.searchCriteria = searchCriteria;
     }
-    
+
+
     public String getName() {
         return name;
     }    
-    public void setName(String newName) {
-        name = newName;
-    }
-    
+
     public String getDescription() {
         return description;
     }    
-    public void setDescription(String newDescription) {
-        description = newDescription;
-    }
-    
+
     public ReferenceTypeEnum getType() {
         return type;
     }
     
-    public void setType(ReferenceTypeEnum newType) {
-        type = newType;
-    }
-    
     public ClassDescriptor getClassDescriptor() {
         return classDescriptor;
-    }
-    
-    public void setClassDescriptor(ClassDescriptor newClassDescriptor) {
-        classDescriptor = newClassDescriptor;
     }
     
     public String getJavaType() {
@@ -78,14 +82,10 @@ public class ReferenceDescriptor implements Displayable {
         }
     }  
 
-    
-        public ClassDescriptor getTargetClass() {
+    public ClassDescriptor getTargetClass() {
         return targetClass;
     }
-    
-    public void setTargetClass(ClassDescriptor newTargetClass) {
-        targetClass = newTargetClass;
-    }
+
     public ObjectDescriptor getTargetObjectDescriptor() {
         Model model = parentObject.getModel();
 
@@ -98,53 +98,12 @@ public class ReferenceDescriptor implements Displayable {
         
     }
 
-    
     public String getTargetMethod() {
         return targetMethod;
-    }
-    
-    public void setTargetMethod(String newTargetMethod) {
-        targetMethod = newTargetMethod;
     }
     
     public ClassDescriptor  getSearchCriteria() {
         return searchCriteria;
     }
-    
-    public void setSearchCriteria(ClassDescriptor  newSearchCriteria) {
-        searchCriteria = newSearchCriteria;
-    }
-    
 
-    
-    public String display() {
-        return display ("");
-    }
-    
-    public String display(String objectDescription) {
-        Map<Object,Displayable> displayedObjects = new HashMap<Object,Displayable>();
-        return display (objectDescription, 0, 0, displayedObjects);
-    }
-    
-    public String display(String objectDescription, int level, int maxLevels, Map<Object,Displayable> displayedObjects) {
-        DisplayBuffer displayBuffer = DisplayBuffer.newInstance("ReferenceDescriptor", objectDescription, level, maxLevels);
-        if (displayBuffer == null) {
-            return "";
-        }
-        displayBuffer.addLine(level+1, "name: " + name); 
-        displayBuffer.addLine(level+1, "description: " + description); 
-        displayBuffer.addLine(level+1, "type: " + type);
-        displayBuffer.addLine(level+1, "targetMethod: " + targetMethod);
-        if (classDescriptor != null) { 
-            displayBuffer.addLine(level+1, "classDescriptor: " + classDescriptor.getFQN()); 
-        }
-        if (targetClass != null) {
-            displayBuffer.addLine(level+1, "targetClass: " + targetClass.getFQN()); 
-        }
-        if (searchCriteria != null) { 
-            displayBuffer.addLine(level+1, "searchCriteria: " + searchCriteria.getFQN()); 
-        }
-        return displayBuffer.toString();
-    }    
-    
 }

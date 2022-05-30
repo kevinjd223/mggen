@@ -322,16 +322,14 @@ public class ObjectDescriptorParser {
             String targetMethod = DomUtil.getChildElementText(elem, "TargetMethod");
             String searchCriteria = DomUtil.getChildElementText(elem, "SearchCriteria");
 
-            ReferenceDescriptor referenceDescriptor = new ReferenceDescriptor(objectDescriptor);
-            referenceDescriptor.setName(name);
-            referenceDescriptor.setDescription(description);
-            referenceDescriptor.setType(ReferenceTypeEnum.getReferenceType(type));
-            referenceDescriptor.setClassDescriptor(new ClassDescriptor(fieldClass));
-            referenceDescriptor.setTargetClass(new ClassDescriptor(targetClass));
-            referenceDescriptor.setTargetMethod(targetMethod);
-            if (!StringUtil.isEmpty(searchCriteria)) { 
-                referenceDescriptor.setSearchCriteria(new ClassDescriptor(searchCriteria));
-            }
+            ReferenceDescriptor referenceDescriptor = new ReferenceDescriptor(objectDescriptor,
+                    name,
+                    description,
+                    ReferenceTypeEnum.getReferenceType(type),
+                    new ClassDescriptor(fieldClass),
+                    new ClassDescriptor(targetClass),
+                    targetMethod,
+                    StringUtil.isEmpty(searchCriteria) ? null : new ClassDescriptor(searchCriteria));
 
             Object previous = references.put(name, referenceDescriptor); 
             Assert.check(previous == null, "Duplicate reference \"" + name + "\" found in " + objectDescriptorFileLocation);

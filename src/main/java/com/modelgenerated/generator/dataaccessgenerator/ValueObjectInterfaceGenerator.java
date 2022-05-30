@@ -178,16 +178,21 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
                 }
                 int length = field.getType() == FieldTypeEnum.STRING ? field.getSize() : 0;
                 
-                StringBuilder str = new StringBuilder();
-                str.append("    FieldAttribute ATTRIB_").append(fieldName.toUpperCase());
-                str.append(" = new FieldAttribute(\"").append(fieldName).append("\", ");  
-                str.append(columnReference).append(", ");  
-                str.append(length).append(");");  
-
-                code.addLine(str.toString());  
+                code.addLine(appendAttr(fieldName, columnReference, length));
             } 
         }
     }
+
+    private String appendAttr(String fieldName, String columnReference, int length) {
+        StringBuilder str = new StringBuilder();
+        str.append("    FieldAttribute ATTRIB_").append(fieldName.toUpperCase());
+        str.append(" = new FieldAttribute(\"").append(fieldName).append("\", ");
+        str.append(columnReference).append(", ");
+        str.append(length).append(");");
+
+        return str.toString();
+    }
+
 
     private void generateSettersAndGetters() {
         Logger.debug(this, "object name" + objectDescriptor.getValueObjectInterface().getFQN());

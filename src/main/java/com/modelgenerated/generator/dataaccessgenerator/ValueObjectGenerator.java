@@ -8,17 +8,12 @@
 package com.modelgenerated.generator.dataaccessgenerator;
 
 import com.modelgenerated.generator.java.ImportGenerator;
-import com.modelgenerated.modelmetadata.ClassDescriptor;
-import com.modelgenerated.modelmetadata.FieldDescriptor;
-import com.modelgenerated.modelmetadata.FieldTypeEnum;
-import com.modelgenerated.modelmetadata.Method;
-import com.modelgenerated.modelmetadata.Model;
-import com.modelgenerated.modelmetadata.ObjectDescriptor;
-import com.modelgenerated.modelmetadata.ReferenceDescriptor;
-import com.modelgenerated.modelmetadata.ReferenceTypeEnum;
+import com.modelgenerated.modelmetadata.*;
 import com.modelgenerated.foundation.logging.Logger;
 import com.modelgenerated.util.Assert;
 import com.modelgenerated.util.StringUtil;
+
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -197,18 +192,18 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
     private void generateDeclarations(ObjectDescriptor objectDescriptor) {
         for (FieldDescriptor field : objectDescriptor.getFields()) {
             if (field.getType() == FieldTypeEnum.CLASS) {
-                code.addLine("    protected " + StringUtil.padString(field.getClassDescriptor().getClassName(), DECLARE_PADDING) + toJavaVariableName(field.getName()) + ";");
+                code.addLine("    protected " + StringUtil.padString(field.getClassDescriptor().getClassName(), DECLARE_PADDING) + " " + toJavaVariableName(field.getName()) + ";");
                 if (field.getPersisted() && objectDescriptor.getPersisted()) { 
-                    code.addLine("    protected " + StringUtil.padString("Identity", DECLARE_PADDING) + toJavaVariableName(field.getName()) + "Id;");
+                    code.addLine("    protected " + StringUtil.padString("Identity", DECLARE_PADDING) + " " + toJavaVariableName(field.getName()) + "Id;");
                 }
             } else if (field.getType() == FieldTypeEnum.ENUM) {
-                    code.addLine("    protected " + StringUtil.padString(field.getClassDescriptor().getClassName(), DECLARE_PADDING) + toJavaVariableName(field.getName()) + ";");
+                    code.addLine("    protected " + StringUtil.padString(field.getClassDescriptor().getClassName(), DECLARE_PADDING) + " " + toJavaVariableName(field.getName()) + ";");
             } else {                
-                code.addLine("    protected " + StringUtil.padString(field.getJavaType(), DECLARE_PADDING) + toJavaVariableName(field.getName()) + ";");
+                code.addLine("    protected " + StringUtil.padString(field.getJavaType(), DECLARE_PADDING) + " " + toJavaVariableName(field.getName()) + ";");
             }
         }
         for (ReferenceDescriptor reference : objectDescriptor.getReferences()) {
-            code.addLine("    protected " + StringUtil.padString(reference.getClassDescriptor().getClassName(), DECLARE_PADDING) + toJavaVariableName(reference.getName()) + ";");
+            code.addLine("    protected " + StringUtil.padString(reference.getClassDescriptor().getClassName(), DECLARE_PADDING) + " " + toJavaVariableName(reference.getName()) + ";");
         }
     }
     
@@ -410,7 +405,25 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
             code.addLine("                try {");
             String targetMethod = reference.getTargetMethod();                
             if (!StringUtil.isEmpty(targetMethod)) {
-                code.addLine("                    " + variableName + " = " + daoVariableName + "." + targetMethod + "(transactionContext, this, loadedObjects);");                
+                // FieldDescriptor fieldDescriptor = re
+
+                ObjectDescriptor target = reference.getTargetObjectDescriptor();
+                QueryDescriptor query = findQueryByMethodName(target.getQueries(), targetMethod);
+
+                FieldDescriptor targetField = target.findField(query.getFieldName());
+
+                code.addLine("                    // targetObject: " + target.getClass().getName());
+                code.addLine("                    // query.fieldName: " + query.getFieldName());
+                code.addLine("                    // targetField.getName(): " + targetField.getName());
+                code.addLine("                    // targetField.getColumnName(): " + targetField.getColumnName());
+                code.addLine("                    // targetField.getType(): " + targetField.getType());
+
+                if (targetField.getType() == FieldTypeEnum.READONLYJOIN) {
+                    code.addLine("                    " + variableName + " = " + daoVariableName + "." + targetMethod + "(transactionContext, this.getId(), loadedObjects);");
+                } else {
+                    code.addLine("                    " + variableName + " = " + daoVariableName + "." + targetMethod + "(transactionContext, this, loadedObjects);");
+                }
+
             } else {
                 ClassDescriptor searchCriteria = reference.getSearchCriteria();
                 if (searchCriteria != null) { 
@@ -623,7 +636,14 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
         Assert.check(implementation != null, "implementation != null");
         return implementation.getFQN();
     }
-    
-    
-    
+
+    private QueryDescriptor findQueryByMethodName(Collection<QueryDescriptor> queryDescriptors, String targetMethod) {
+        return queryDescriptors.stream()
+                .filter(q -> targetMethod.equals(q.getMethodName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+
+
 }
