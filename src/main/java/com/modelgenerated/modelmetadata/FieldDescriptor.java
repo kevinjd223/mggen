@@ -339,7 +339,7 @@ public class FieldDescriptor implements Displayable {
     /**
      * Returns the list of joins associated with this Field. 
      * If Type == READONLYJOIN return a set of unique JoinDescriptors based on column field.
-     * If Type != READONLYJOIN return null.
+     * If Type != READONLYJOIN return empty list.
      * 
      */
     public JoinList getJoins() {

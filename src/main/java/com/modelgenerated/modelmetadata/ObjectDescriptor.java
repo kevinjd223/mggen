@@ -9,6 +9,7 @@ package com.modelgenerated.modelmetadata;
 
 import com.modelgenerated.foundation.debug.Displayable;
 import com.modelgenerated.foundation.debug.DisplayBuffer;
+import com.modelgenerated.foundation.identity.Identity;
 import com.modelgenerated.util.Assert;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -316,6 +317,7 @@ public class ObjectDescriptor implements Displayable {
             fieldDescriptor.setType(FieldTypeEnum.IDENTITY);
             fieldDescriptor.setPersisted(true);
             fieldDescriptor.setNullable(false);
+            fieldDescriptor.setClassDescriptor(new ClassDescriptor(Identity.class.getCanonicalName()));
             return fieldDescriptor;
         } else {
             return fieldMap.get(name);
@@ -543,9 +545,6 @@ public class ObjectDescriptor implements Displayable {
     
         for (FieldDescriptor fieldDescriptor : fieldMap.values()) {
             displayBuffer.append(fieldDescriptor.display("", level+1, maxLevels, displayedObjects));
-        }
-        for (ReferenceDescriptor referenceDescriptor : references.values()) {
-            displayBuffer.append(referenceDescriptor.display("", level+1, maxLevels, displayedObjects));
         }
         for (QueryDescriptor queryDescriptor : queries.values()) {
             displayBuffer.append(queryDescriptor.display("", level+1, maxLevels, displayedObjects));

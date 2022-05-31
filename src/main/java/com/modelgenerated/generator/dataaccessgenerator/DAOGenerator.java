@@ -535,12 +535,20 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         addJoins(objectDescriptor);
 
+        code.addLine("            // objectTableAlias: " + objectTableAlias);
+        code.addLine("            // columnName: " + columnName);
+        code.addLine("            // realname: " + findField.getRealColumnName());
+        String whereOrAnd = "";
         if (objectDescriptor.getMultiTenant()) {
-        	code.addLine("            sql.append(\"where " + objectTableAlias + ".tid = ? and " + objectTableAlias + "." + columnName + " = ? \");");
+        	code.addLine("            sql.append(\"where " + objectTableAlias + ".tid = ? \");");
+            whereOrAnd = "and ";
         } else {
-        	code.addLine("            sql.append(\"where " + objectTableAlias + "." + columnName + " = ? \");");
+            whereOrAnd = "where ";
         }
-        
+        code.addLine("            sql.append(\"" + whereOrAnd
+                + ((findField.getType() == FieldTypeEnum.READONLYJOIN) ? findAliasForJoinColumn(findField) : objectTableAlias)
+                + "." + findField.getRealColumnName() + " = ? \");");
+
         if (orderBy != null) { 
             code.addLine("            sql.append(\"order by  " + objectTableAlias + "." + orderBy + "\");");
         }
@@ -563,6 +571,11 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
             code.addLine("            statement.setBytes(" + index++ + ", " + varName + ".getId().getByteValue());");
         } else if (findField.getType() == FieldTypeEnum.STRING) {
             code.addLine("            statement.setString(" + index++ + ", " + varName + ");");
+        } else if (findField.getType() == FieldTypeEnum.READONLYJOIN) {
+            code.addLine("            // name: " + findField.getName());
+            code.addLine("            // realname: " + findField.getRealColumnName());
+            code.addLine("            // varName: " + varName);
+            code.addLine("            JDBCUtil.setStatement(statement, " + index++ + ", " + varName + ", false);");
         } else {
             Assert.check(false, "type not supported for find " + findField.getType());
         }
@@ -616,6 +629,26 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine("        } ");
         code.addLine("    }");
     }
+
+    private String addJoins(ObjectDescriptor objectDescriptor) {
+        JoinList joinList = objectDescriptor.getJoins();
+
+        for (JoinDescriptor joinDescriptor : joinList) {
+            code.add("            sql.append(\"left outer join ");
+            code.add(openEncapsulate +  joinDescriptor.rightTable + closeEncapsulate + " as " + joinDescriptor.rightAlias);
+            code.add(" on (" + objectDescriptor.getTableAlias() + ".tid = " + joinDescriptor.rightAlias + ".tid");
+            code.add(" and " + joinDescriptor.leftAlias + "." + joinDescriptor.leftColumn);
+            code.addLine(" = " + joinDescriptor.rightAlias + "." + joinDescriptor.rightColumn + ") \");");
+        }
+
+        return null;
+    }
+
+    private String findAliasForJoinColumn(FieldDescriptor findField) {
+        JoinList joinList = findField.getJoins();
+        return joinList.get(joinList.size() - 1).rightAlias;
+    }
+
     
     private void generateFindForUpdate() {
         code.addLine("    public ValueObject findForUpdate(TransactionContext transactionContext, Identity id) {");
@@ -1591,18 +1624,5 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         return classDescriptor.getFQN();
     }
 
-    private String addJoins(ObjectDescriptor objectDescriptor) {
-        JoinList joinList = objectDescriptor.getJoins();
-        
-        for (JoinDescriptor joinDescriptor : joinList) {
-            code.add("            sql.append(\"left outer join ");
-            code.add(openEncapsulate +  joinDescriptor.rightTable + closeEncapsulate + " as " + joinDescriptor.rightAlias);
-            code.add(" on " + joinDescriptor.leftAlias + "." + joinDescriptor.leftColumn);
-            code.addLine(" = " + joinDescriptor.rightAlias + "." + joinDescriptor.rightColumn + " \");");            
-        }
-        
-        return null;
-    }
-    
-    
+
 }
