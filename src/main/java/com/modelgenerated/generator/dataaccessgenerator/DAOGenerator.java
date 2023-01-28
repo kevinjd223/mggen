@@ -860,7 +860,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
                     code.addLine("                    SubObjectHelper.setReadOnlyVariable(" + valueObjectVariable + ", \"" + field.getName() + "\", resultSet.getString(" + index + "));");
                 } else if (joinedField.getType() == FieldTypeEnum.IDENTITY) { 
                     code.addLine("                    SubObjectHelper.setReadOnlyVariable(" + valueObjectVariable + ", \"" + field.getName() + "\", resultSet.getBytes(" + index + "));");
-                } else if (joinedField.getType() == FieldTypeEnum.INTEGER) { 
+                } else if (joinedField.getType() == FieldTypeEnum.INTEGER || joinedField.getType() == FieldTypeEnum.INT) {
                     code.addLine("                    SubObjectHelper.setReadOnlyVariable(" + valueObjectVariable + ", \"" + field.getName() + "\", resultSet.getInt(" + index + "));");
                 } else if (joinedField.getType() == FieldTypeEnum.DOUBLE) { 
                     code.addLine("                    SubObjectHelper.setReadOnlyVariable(" + valueObjectVariable + ", \"" + field.getName() + "\", ResultSetWrapper.getDouble(resultSet, " + index + "));");
