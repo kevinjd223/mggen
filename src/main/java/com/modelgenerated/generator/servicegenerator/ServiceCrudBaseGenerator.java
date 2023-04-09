@@ -248,6 +248,11 @@ public class ServiceCrudBaseGenerator {
                 code.addLine("        return (" + listObjectClassName + ")" + daoVariableName + ".search(userContext, searchCriteria, false);");
                 code.addLine("    }");
                 code.addLine();
+                code.addLine("    public int " + valueObjectVariableName + "SearchCount(UserContext userContext, SearchCriteria searchCriteria) {");
+                code.addLine("        " + daoClassName + " " + daoVariableName + "= (" + daoClassName + ")DataAccessLocator.findDAO(" + valueObjectClassName + ".class);");
+                code.addLine("        return " + daoVariableName + ".searchCount(userContext, searchCriteria);");
+                code.addLine("    }");
+                code.addLine();
             }
         }        
         

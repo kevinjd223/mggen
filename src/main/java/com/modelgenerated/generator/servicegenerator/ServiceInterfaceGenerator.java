@@ -200,7 +200,8 @@ public class ServiceInterfaceGenerator {
 	            code.addLine("    " + valueObjectClassName + " find" + valueObjectClassName + "(UserContext userContext, Identity id) throws RemoteException;");
 	            code.addLine("    void save" + valueObjectClassName + "(UserContext userContext, " + valueObjectClassName + " " + valueObjectVariableName + ") throws RemoteException;");
 	            if (crudObject.getGenerateSearchMethod()) {
-	                code.addLine("    " + listObjectClassName + " " + valueObjectVariableName + "Search(UserContext userContext, SearchCriteria searchCriteria) throws RemoteException;");
+                    code.addLine("    " + listObjectClassName + " " + valueObjectVariableName + "Search(UserContext userContext, SearchCriteria searchCriteria) throws RemoteException;");
+                    code.addLine("    int " + valueObjectVariableName + "SearchCount(UserContext userContext, SearchCriteria searchCriteria) throws RemoteException;");
 	            }
         	} else {
 	            code.addLine("    /**");
@@ -234,6 +235,10 @@ public class ServiceInterfaceGenerator {
 		            code.addLine("     * CRUD method to read/search for a list of " + valueObjectClassName + ".");            
 		            code.addLine("     */");
 	                code.addLine("    " + listObjectClassName + " " + valueObjectVariableName + "Search(UserContext userContext, SearchCriteria searchCriteria);");
+                    code.addLine("    /**");
+                    code.addLine("     * CRUD method. Returns count of rows returned by searchCriterid.");
+                    code.addLine("     */");
+                    code.addLine("    int " + valueObjectVariableName + "SearchCount(UserContext userContext, SearchCriteria searchCriteria);");
 	            }
         	}
         }        
