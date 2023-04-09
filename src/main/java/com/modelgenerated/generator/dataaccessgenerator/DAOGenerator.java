@@ -214,6 +214,10 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine();
         generateSearch();
         code.addLine();
+        generateUserContextSearchCount();
+        code.addLine();
+        generateSearchCount();
+        code.addLine();
         generateLoadChildrenMethod();
         code.addLine();
         generateSaveChildrenMethod();
@@ -1464,6 +1468,106 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
 
         code.addLine("            return " + listVariableName + ";");
         
+        code.addLine("        } catch (SQLException e) {");
+        code.addLine("            throw new DataAccessException (\"Error finding record \", e);");
+        code.addLine("        }");
+        code.addLine("    }");
+    }
+
+    private void generateUserContextSearchCount() {
+        //ClassDescriptor valueObjectDescriptor = objectDescriptor.getValueObjectInterface();
+        String listInterfaceName = objectDescriptor.getListInterface().getClassName();
+        code.addLine("    public int searchCount(UserContext userContext, SearchCriteria searchCriteria) {");
+        code.addLine("        Assert.check(userContext != null, \"userContext != null\");");
+        code.addLine("        TransactionContext transactionContext = new TransactionContext(userContext);");
+        code.addLine("        try {");
+        code.addLine("            return searchCount(transactionContext, searchCriteria);");
+        code.addLine("        } finally {");
+        code.addLine("            transactionContext.close();");
+        code.addLine("        }");
+        code.addLine("    }");
+    }
+
+    private void generateSearchCount() {
+        ClassDescriptor valueObjectDescriptor = objectDescriptor.getValueObjectInterface();
+        String listInterfaceName = objectDescriptor.getListInterface().getClassName();
+        String listVariableName = objectDescriptor.getListInterface().getJavaVariableName();
+        String voInterfaceName = valueObjectDescriptor.getClassName();
+        String voVariableName = valueObjectDescriptor.getJavaVariableName();
+
+        code.addLine("    public int searchCount(TransactionContext transactionContext, SearchCriteria searchCriteria) {");
+        code.addLine("        Assert.check(transactionContext != null, \"transactionContext != null\");");
+        code.addLine("        if (searchCriteria == null) {");
+        code.addLine("            searchCriteria = new SearchCriteriaBase();");
+        code.addLine("        }");
+        code.addLine("        try {");
+        code.addLine("            Connection connection = transactionContext.findConnection(daoDescriptor.getConnectionName());");
+        code.addLine("            Assert.check(connection != null, \"connection != null\");");
+        code.addLine();
+
+        ObjectDescriptor baseObjectDescriptor = objectDescriptor.getBaseObjectDescriptor();
+
+        String objectTableAlias = objectDescriptor.getTableAlias();
+        if (objectTableAlias == null) {
+            objectTableAlias = "obj";
+        }
+        String baseTableAlias = "base";
+        if (baseObjectDescriptor != null) {
+            if (baseObjectDescriptor.getTableAlias() != null) {
+                baseTableAlias = baseObjectDescriptor.getTableAlias();;
+            }
+        }
+
+        String previousAlias = objectTableAlias;
+
+        code.addLine("            StringBuilder sql = new StringBuilder();");
+        code.addLine("            sql.append(\"select count(*)\");");
+        code.addLine("            sql.append(\"from " + openEncapsulate + objectDescriptor.getTableName() + closeEncapsulate +" as " + objectTableAlias + " \");");
+        if (baseObjectDescriptor != null) {
+            code.addLine("            sql.append(\"inner join " +  baseObjectDescriptor.getTableName() + " as " + baseTableAlias + " on " + objectTableAlias + ".id = " + baseTableAlias + ".id \");");
+            previousAlias = baseTableAlias;
+        }
+        addJoins(objectDescriptor);
+
+
+        code.addLine("            searchCriteria.setPreviousAlias(\"" + previousAlias + "\");");
+        code.addLine("            sql.append(searchCriteria.getFromClause());");
+
+        //code.addLine("            sql.append(\"where \");");
+
+        code.addLine("            String whereClause = searchCriteria.getWhereClause();");
+        if (objectDescriptor.getMultiTenant()) {
+            code.addLine("            sql.append(\"where " + previousAlias + ".tid = ? \");");
+            code.addLine("            if (!StringUtil.isEmpty(whereClause)) { ");
+            code.addLine("                sql.append(\" and (\");");
+            code.addLine("                sql.append(whereClause);");
+            code.addLine("                sql.append(\")\");");
+            code.addLine("            }");
+        } else {
+            code.addLine("            if (!StringUtil.isEmpty(whereClause)) { ");
+            code.addLine("                sql.append(\"where \");");
+            code.addLine("                sql.append(whereClause);");
+            code.addLine("            }");
+        }
+
+        code.addLine("            Logger.debug(this, \"select from " + openEncapsulate + objectDescriptor.getTableName() + closeEncapsulate + "\");");
+        code.addLine("            Logger.debug(this, sql);");
+        code.addLine("            PreparedStatement statement = connection.prepareStatement(sql.toString());");
+        code.addLine();
+        if (objectDescriptor.getMultiTenant()) {
+            code.addLine("            Identity tenantId = transactionContext.getUserContext().getTenantId();");
+            code.addLine("            Assert.check(tenantId != null, \"tenantId != null\");");
+            code.addLine("            JDBCUtil.setStatement(statement, 1, tenantId, false);");
+            code.addLine("            searchCriteria.setParameters(statement, 2);");
+        } else {
+            code.addLine("            searchCriteria.setParameters(statement, 1);");
+        }
+
+        code.addLine("            ResultSet resultSet = statement.executeQuery();");
+        code.addLine();
+        code.addLine("            resultSet.next();");
+        code.addLine("            return resultSet.getInt(1);");
+
         code.addLine("        } catch (SQLException e) {");
         code.addLine("            throw new DataAccessException (\"Error finding record \", e);");
         code.addLine("        }");

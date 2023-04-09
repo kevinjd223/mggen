@@ -141,12 +141,16 @@ public class DAOInterfaceGenerator extends JavaCodeBaseGenerator {
         
         
     }
+
+
     private void generateSearch() {
         //ClassDescriptor valueObjectDescriptor = objectDescriptor.getValueObjectInterface();
         String listInterfaceName = objectDescriptor.getListInterface().getClassName();
 
         code.addLine("    public " + listInterfaceName + " search(UserContext userContext, SearchCriteria searchCriteria, boolean deepCopy);");
         code.addLine("    public " + listInterfaceName + " search(TransactionContext transactionContext, SearchCriteria searchCriteria, boolean deepCopy);");
+        code.addLine("    public int searchCount(UserContext userContext, SearchCriteria searchCriteria);");
+        code.addLine("    public int searchCount(TransactionContext transactionContext, SearchCriteria searchCriteria);");
     }
 
     
