@@ -43,7 +43,13 @@ public class MysqlCreateTableGenerator extends CreateTableGenerator {
     }
 
     protected void generateIndex(String tableName, String indexName, String columns, boolean unique) {
-        code.addLine("ALTER TABLE " + tableName + " ADD INDEX " + indexName +  " (" + columns + ");");
+        code.addLine("ALTER TABLE "
+                + tableName
+                + " ADD"
+                + (unique ? " UNIQUE" : "")
+                + " INDEX "
+                + indexName
+                +  " (" + columns + ");");
     }
     
     
