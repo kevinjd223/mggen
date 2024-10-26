@@ -1,8 +1,5 @@
-/*
- * ValueObjectGenerator.java
- *
- * Created on February 2, 2003, 7:59 AM
- * Copyright 2002-2005 Kevin Delargy.
+/* ValueObjectGenerator.java
+ * Copyright 2002-2024 Kevin Delargy.
  */
 
 package com.modelgenerated.generator.dataaccessgenerator;
@@ -38,10 +35,12 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
         }
         code.addLine("*/");
     }
+
     protected void generatePackage() {
         code.addLine();
         code.addLine("package " + getPackageName() + ";");
     }
+
     protected void generateImports() {
         code.addLine();
         
@@ -115,11 +114,21 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
                 ClassDescriptor classDescriptor = field.getClassDescriptor();
 				importGenerator.addImport(classDescriptor.getFQN());                    
             }
-        }                
-        
+        }
+
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.DATE)
+                ||objectDescriptor.hasFieldType(FieldTypeEnum.DATETIME)) {
+            importGenerator.addImport("java.util.Date");
+        }
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.INSTANT)) {
+            importGenerator.addImport("java.time.Instant");
+        }
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.LOCALDATE)) {
+            importGenerator.addImport("java.time.LocalDate");
+        }
+
 		importGenerator.addImport("java.io.Serializable");
-		importGenerator.addImport("java.util.ArrayList");
-		importGenerator.addImport("java.util.Date");
+        importGenerator.addImport("java.util.ArrayList");
 		importGenerator.addImport("java.util.HashMap");
 		importGenerator.addImport("java.util.Iterator");
 		importGenerator.addImport("java.util.List");
@@ -539,13 +548,13 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
     }
     
     private void generateDisplayMethods() {
-        code.addLine();    
-        code.addLine("    // Displayable methods");    
+        code.addLine();
+        code.addLine("    // Displayable methods");
         code.addLine("    @Override");
         code.addLine("    public String display() {");
         code.addLine("        return display (\"\");");
         code.addLine("    }");
-        code.addLine();    
+        code.addLine();
         code.addLine("    @Override");
         code.addLine("    public String display(String objectDescription) {");
         code.addLine("        Map<Object,Displayable> displayedObjects = new HashMap<Object,Displayable>();");
@@ -561,8 +570,8 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
         code.addLine("        if (this.getId() != null && displayedObjects.get(this.getId()) != null) {");
         code.addLine("            displayBuffer.addLine(level+1, \"id: \" + id);");
         code.addLine("            return displayBuffer.toString();");
-        code.addLine("        }");        
-        code.addLine("        displayedObjects.put(this.getId(), this);");        
+        code.addLine("        }");
+        code.addLine("        displayedObjects.put(this.getId(), this);");
 
         code.addLine("        displayBuffer.addLine(level+1, \"id: \" + id);");
         code.addLine("        displayBuffer.addLine(level+1, \"isDirty: \" + isDirty);");
@@ -596,7 +605,7 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
                 code.addLine("        displayBuffer.addLine(level+1, \"" + toJavaVariableName(field.getName()) + ": \" + get" + field.getName() + "());");
             }
         }
-        
+
         for (FieldDescriptor field : objectDescriptor.getFields()) {
             if (field.getType() == FieldTypeEnum.CLASS && field.getPersisted()) {
                 String varName = toJavaVariableName(field.getName());
@@ -613,23 +622,23 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
         }
 
         for (ReferenceDescriptor referenceDescriptor : objectDescriptor.getReferences()) {
-            if ((referenceDescriptor.getType() == ReferenceTypeEnum.ONE_TO_MANY) 
-                || (referenceDescriptor.getType() == ReferenceTypeEnum.ONE_TO_ONE)) { 
+            if ((referenceDescriptor.getType() == ReferenceTypeEnum.ONE_TO_MANY)
+                || (referenceDescriptor.getType() == ReferenceTypeEnum.ONE_TO_ONE)) {
                 String varName = toJavaVariableName(referenceDescriptor.getName());
                 code.addLine("        if (" + varName + " == null) {");
                 code.addLine("            displayBuffer.addLine(level+1, \"" + varName + ": \" + " + varName + ");");
                 code.addLine("        } else {");
                 code.addLine("            displayBuffer.append(" + varName + ".display(\"" + varName + "\", level+1, maxLevels, displayedObjects));");
-                code.addLine("        }");          
+                code.addLine("        }");
             } else {
                 Assert.check(false, "Unsupported referenceTypeEnum");
             }
-        }        
-        
+        }
+
         code.addLine("        return displayBuffer.toString();");
         code.addLine("    }");
-    }    
-    
+    }
+
     protected String getFullyQualifiedName() {
         Assert.check(objectDescriptor != null, "objectDescriptor != null");
         ClassDescriptor implementation = objectDescriptor.getImplementationName();

@@ -1,8 +1,6 @@
-/*
- * DAOGenerator.java
+/* DAOGenerator.java
  *
- * Created on February 2, 2003, 7:59 AM
- * Copyright 2002-2005 Kevin Delargy.
+ * Copyright 2002-2024 Kevin Delargy.
  */
 
 package com.modelgenerated.generator.dataaccessgenerator;
@@ -31,6 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * Generate DAO class.
+ * Generates methods to
  *
  * @author  kevind
  */
@@ -74,10 +74,12 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         code.addLine("*/");
     }
+
     protected void generatePackage() {
         code.addLine();
         code.addLine("package " + getPackageName() + ";");
     }
+
     protected void generateImports() {
         code.addLine();
         
@@ -152,6 +154,12 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
             ||objectDescriptor.hasFieldType(FieldTypeEnum.DATETIME)) {
             importGenerator.addImport("java.util.Date");
         }
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.INSTANT)) {
+            importGenerator.addImport("java.time.Instant");
+        }
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.LOCALDATE)) {
+            importGenerator.addImport("java.time.LocalDate");
+        }
         importGenerator.addImport("java.util.HashMap");
         importGenerator.addImport("java.util.Iterator");
         importGenerator.addImport("java.util.Map");
@@ -169,12 +177,14 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
 
     protected void generateClassJavaDocs() {
     }
-    
+
+    /**
+     * Generate all the parts of the DAO class.
+     */
     protected void generateClass() {
         code.addLine();
         code.addLine("public class " + getClassName() + " extends AbstractDataAccessObject implements " + objectDescriptor.getDAOInterface().getClassName() + " {");
 
-        
         generateVariables();
         generateConstructor();
         
@@ -232,6 +242,11 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine("    String sqlUpdate;");        
         code.addLine();        
     }
+
+
+    /**
+     * Create the DAO default constructor
+     */
     private void generateConstructor() {
 
         code.addLine("    public " + getClassName() + "() {");
@@ -258,6 +273,8 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         
         code.addLine("    }");        
     }
+
+
     private void generateSelect(boolean withJoins) {
         ObjectDescriptor baseObjectDescriptor = objectDescriptor.getBaseObjectDescriptor();
         
@@ -324,6 +341,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
                     code.add("        sql.append(\"null");            
                 }
             } else {
+                // all other field types
                 code.addLine(",\");");
                 code.add("        sql.append(\"" + objectTableAlias + "." + field.getRealColumnName());            
             }
@@ -379,9 +397,11 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         return list.toArray(new String[0]);
     }
-    
-    
-    
+
+
+    /**
+     * Generate the insert statement.
+     */
     private void generateInsert() {
         code.add    ("        sql.append(\"insert " + openEncapsulate + objectDescriptor.getTableName() + closeEncapsulate + " (id");
         if (objectDescriptor.getMultiTenant()) {
@@ -460,7 +480,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
             }
         }
         code.addLine(" = ? \");");
-        
+
         code.addLine("        sql.append(\"where id = ?\");");
     }
     
@@ -687,7 +707,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
 
         code.addLine("            sql.append(\"where " + objectTableAlias + ".id = ? \");");
-       
+
         
         
         //code.addLine("            Logger.debug(this, \"sql: \" + sql.toString());");
@@ -699,7 +719,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         
         code.addLine();
         code.addLine("            statement.setBytes(1, id.getByteValue());");
-        
+
         
         code.addLine("            resultSet = statement.executeQuery();");                
 
@@ -827,25 +847,31 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
 			} else if (field.getType() == FieldTypeEnum.BOOLEAN) {
 				code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(ResultSetWrapper.getBoolean(resultSet, " + index + "));");
 				index++;
-			} else if (field.getType() == FieldTypeEnum.DOUBLE) {
-				code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(ResultSetWrapper.getDouble(resultSet, " + index + "));");
-				index++;
-			} else if (field.getType() == FieldTypeEnum.INTEGER) {
-				code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(ResultSetWrapper.getInteger(resultSet, " + index + "));");
-				index++;
-            } else if (field.getType() == FieldTypeEnum.TEXT) {
-                code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(resultSet.getString(" + index + "));");
+            } else if (field.getType() == FieldTypeEnum.COALESCE) {
+                code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(resultSet.get" + field.getJavaType() + "(" + index + "));");
                 index++;
             } else if (field.getType() == FieldTypeEnum.DATETIME) {
                 code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(resultSet.getTimestamp(" + index + ") == null ? null : new java.util.Date(resultSet.getTimestamp(" + index + ").getTime()));");
                 index++;
+			} else if (field.getType() == FieldTypeEnum.DOUBLE) {
+				code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(ResultSetWrapper.getDouble(resultSet, " + index + "));");
+				index++;
             } else if (field.getType() == FieldTypeEnum.ENUM) {
                 code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(resultSet.getString(" + index + "));");
                 index++;
+            } else if (field.getType() == FieldTypeEnum.INSTANT) {
+                code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(ResultSetWrapper.getInstant(resultSet, " + index + "));");
+                index++;
+            } else if (field.getType() == FieldTypeEnum.INTEGER) {
+                code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(ResultSetWrapper.getInteger(resultSet, " + index + "));");
+                index++;
+            } else if (field.getType() == FieldTypeEnum.LOCALDATE) {
+                code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(ResultSetWrapper.getLocalDate(resultSet, " + index + "));");
+                index++;
             } else if (field.getType() == FieldTypeEnum.READONLYJOIN) {
                 // do nothing
-            } else if (field.getType() == FieldTypeEnum.COALESCE) {
-                code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(resultSet.get" + field.getJavaType() + "(" + index + "));");
+            } else if (field.getType() == FieldTypeEnum.TEXT) {
+                code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(resultSet.getString(" + index + "));");
                 index++;
             } else {
                 code.addLine("                    " + valueObjectVariable + ".set" + field.getName() + "(resultSet.get" + field.getType() + "(" + index + "));");
@@ -1090,6 +1116,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         
         code.addLine("            // where clause");
+        code.addLine("            JDBCUtil.setStatement(statement, " + index++ + ", transactionContext.getUserContext().getTenantId(), false);");
         code.addLine("            JDBCUtil.setStatement(statement, " + index + ", " + valueObjectName + ".getId(), false);");
         code.addLine();
         
