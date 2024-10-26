@@ -57,7 +57,7 @@ import java.util.Set;
  *
  * @author  kevind
  */
-public class ObjectDescriptor implements Displayable {
+public class ObjectDescriptor {
     private Model model;
     
     private ClassDescriptor valueObjectInterface;
@@ -336,10 +336,17 @@ public class ObjectDescriptor implements Displayable {
         }
         return null;
     }
-    
+
+    /**
+     * Returns this object has this field type directly or through a joined field.
+     */
     public boolean hasFieldType(FieldTypeEnum type) {
         for (FieldDescriptor fieldDescriptor : fieldMap.values()) {
-            if (fieldDescriptor.getType() == type) {
+            FieldDescriptor joinedFieldDescriptor = fieldDescriptor.getType() == FieldTypeEnum.READONLYJOIN
+                    ? fieldDescriptor.getJoinedFieldDescriptor() : null;
+
+            if (fieldDescriptor.getType() == type
+                    || (joinedFieldDescriptor != null && joinedFieldDescriptor.getType() == type)) {
                 return true;
             }
         }
@@ -512,59 +519,5 @@ public class ObjectDescriptor implements Displayable {
     }
 
     
-    
-    // Displayable interface methods
-	@Override
-    public String display() {
-        return display ("");
-    }
-    
-	@Override
-    public String display(String objectDescription) {
-        Map<Object,Displayable> displayedObjects = new HashMap<Object,Displayable>();
-        return display (objectDescription, 0, 0, displayedObjects);
-    }
-    
-	@Override
-    public String display(String objectDescription, int level, int maxLevels, Map<Object,Displayable> displayedObjects) {
-        DisplayBuffer displayBuffer = DisplayBuffer.newInstance("ObjectDescriptor", objectDescription, level, maxLevels);
-        if (displayBuffer == null) {
-            return "";
-        }
-        
-        displayBuffer.addLine(level+1, "valueObjectInterface: " + valueObjectInterface);         
-        displayBuffer.addLine(level+1, "implementationName: " + implementationName); 
-        displayBuffer.addLine(level+1, "tableName: " + tableName); 
-        displayBuffer.addLine(level+1, "baseInterface: " + baseInterface); 
-        displayBuffer.addLine(level+1, "description: " + description); 
-        displayBuffer.addLine(level+1, "cloneable: " + cloneable); 
-        displayBuffer.addLine(level+1, "persisted: " + persisted); 
-        displayBuffer.addLine(level+1, "supportsAudit: " + supportsAudit);
-        displayBuffer.addLine(level+1, "createdModifiedFields: " + createdModifiedFields);
-        displayBuffer.addLine(level+1, "multiTenant: " + multiTenant);
-    
-        for (FieldDescriptor fieldDescriptor : fieldMap.values()) {
-            displayBuffer.append(fieldDescriptor.display("", level+1, maxLevels, displayedObjects));
-        }
-        for (QueryDescriptor queryDescriptor : queries.values()) {
-            displayBuffer.append(queryDescriptor.display("", level+1, maxLevels, displayedObjects));
-        }
-        for (IndexDescriptor indexDescriptor : indicies.values()) {
-            displayBuffer.append(indexDescriptor.display("", level+1, maxLevels, displayedObjects));
-        }
-        for (ClassDescriptor implementsInterface : implementsList) {
-            displayBuffer.append(implementsInterface.display("", level+1, maxLevels, displayedObjects));
-        }
-        for (Method method : methods) {
-            displayBuffer.append(method.display("", level+1, maxLevels, displayedObjects));
-        }
-        for (Method method : listMethods) {
-            displayBuffer.append(method.display("", level+1, maxLevels, displayedObjects));
-        }
 
-        
-        return displayBuffer.toString();
-        
-    }
-    
 }
