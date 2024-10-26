@@ -22,7 +22,7 @@ import java.util.Map;
  * 
  * @author  kevind
  */
-public class FieldDescriptor implements Displayable {
+public class FieldDescriptor {
     private ObjectDescriptor parentObject;
     private String name;
     private String description;
@@ -258,6 +258,7 @@ public class FieldDescriptor implements Displayable {
      *   
      */
     public FieldDescriptor getJoinedFieldDescriptor() {
+        Assert.check(FieldTypeEnum.READONLYJOIN == this.getType(), "FieldTypeEnum.READONLYJOIN == this.getType()");
         String delimiter = "\\x2E"; // dot separated.
         Logger.debug(this, "delimiter: " + delimiter);
 
@@ -407,47 +408,11 @@ public class FieldDescriptor implements Displayable {
         }
         return joinList;
     }
-    /*
-    public Map workinggetJoins() {
-                
-        if (this.getType() == FieldTypeEnum.READONLYJOIN) {
-            Map joinMap = new HashMap();
-            
-            JoinDescriptor joinDescriptor = new JoinDescriptor();                        
-            joinDescriptor.leftTable = parentObject.getTableName();
-            joinDescriptor.leftAlias = parentObject.getTableAlias();
 
-            Logger.debug(this, "joinField: " + this.getJoinField());
-            
-            FieldDescriptor joinFieldDescriptor = parentObject.findField(this.getJoinField());
-            Logger.debug(this, "joinFieldDescriptor: " + joinFieldDescriptor);
-
-            joinDescriptor.leftColumn = joinFieldDescriptor.getColumnName();            
-            
-            Model model = parentObject.getModel();
-            ClassDescriptor joinClassDescriptor = joinFieldDescriptor.getClassDescriptor();
-            ObjectDescriptor joinObjectDescriptor = model.findObject(joinClassDescriptor.getFQN());
-            
-            joinDescriptor.rightAlias = joinFieldDescriptor.getAlias();
-            joinDescriptor.rightTable = joinObjectDescriptor.getTableName();
-            joinDescriptor.rightColumn = "Id";
-            
-            String key = joinDescriptor.leftAlias + "." + joinDescriptor.rightAlias;
-            
-            if (!joinMap.containsKey(key)) {
-                joinMap.put(key, joinDescriptor);
-            }
-            return joinMap;
-        }
-        return null;
-    }
-    */
     public boolean isDeprecated() {
         return description != null && description.contains("@deprecated");
     }
-    
-    
-    
+
     public String getCoalesce1() {
 		return coalesce1;
 	}
@@ -476,40 +441,5 @@ public class FieldDescriptor implements Displayable {
 		this.coalesce4 = coalesce4;
 	}
 
-	// Displayable
-	@Override
-    public String display() {
-        return display ("");
-    }
-    
-	@Override
-    public String display(String objectDescription) {
-        Map<Object,Displayable> displayedObjects = new HashMap<Object,Displayable>();
-        return display (objectDescription, 0, 0, displayedObjects);
-    }
-    
-	@Override
-    public String display(String objectDescription, int level, int maxLevels, Map<Object,Displayable> displayedObjects) {
-        DisplayBuffer displayBuffer = DisplayBuffer.newInstance("FieldDescriptor", objectDescription, level, maxLevels);
-        if (displayBuffer == null) {
-            return "";
-        }
-        displayBuffer.addLine(level+1, "name: " + name); 
-        displayBuffer.addLine(level+1, "description: " + description); 
-        displayBuffer.addLine(level+1, "columnName: " + columnName); 
-        displayBuffer.addLine(level+1, "type: " + type); 
-        displayBuffer.addLine(level+1, "classDescriptor: " + classDescriptor); 
-        displayBuffer.addLine(level+1, "size: " + size); 
-        displayBuffer.addLine(level+1, "persisted: " + persisted); 
-        displayBuffer.addLine(level+1, "nulllable: " + nullable); 
-        displayBuffer.addLine(level+1, "useInTest: " + useInTest); 
-        displayBuffer.addLine(level+1, "referenceType: " + referenceType); 
-        displayBuffer.addLine(level+1, "joinField: " + joinField); 
-        displayBuffer.addLine(level+1, "alias: " + alias); 
-        displayBuffer.addLine(level+1, "version: " + version); 
-        displayBuffer.addLine(level+1, "sql: " + sql); 
-        
-        return displayBuffer.toString();
-    }    
-    
+
 }
