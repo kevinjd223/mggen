@@ -1,28 +1,20 @@
-/*
- * Model.java
+/* Model.java
  *
- * Created on November 3, 2002, 9:09 AM
- * Copyright 2002-2005 Kevin Delargy.
+ * Copyright 2002-2024 Kevin Delargy.
  */
 
 package com.modelgenerated.modelmetadata;
 
-import com.modelgenerated.foundation.debug.Displayable;
-import com.modelgenerated.foundation.debug.DisplayBuffer;
 import com.modelgenerated.modelmetadata.enums.EnumDescriptor;
 import com.modelgenerated.modelmetadata.service.ServiceDescriptor;
 import com.modelgenerated.util.Assert;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
- *
- * @author  kevind
+ * Represents the domain model of the application.
  */
-public class Model implements Displayable {
+public class Model {
     private String packagesToGenerate;
     private String copyrightNotice;
     private Map<String, ObjectDescriptor> objects = new HashMap<String, ObjectDescriptor>();
@@ -51,7 +43,6 @@ public class Model implements Displayable {
     
     /**
      * Adds an objectDescriptor to the model
-     * @param objectDescriptor
      */
     public void addObject(ObjectDescriptor objectDescriptor) {
     	Assert.check(objectDescriptor != null, "objectDescriptor != null");
@@ -72,7 +63,6 @@ public class Model implements Displayable {
     /**
      * Adds an externaObjectDescriptor to the model
      * ExternalObject are not generated, but are needed because this model refernences them
-     * @param objectDescriptor
      */
     public void addExternalObject(ObjectDescriptor objectDescriptor) {
     	Assert.check(objectDescriptor != null, "objectDescriptor != null");
@@ -93,8 +83,6 @@ public class Model implements Displayable {
     /**
      * Find and object by the fully qualified interfaceName.
      * First looks in objects that are part of this model and if not found checks external objects  
-     * @param fullyQualifiedInterfaceName
-     * @return
      */
     public ObjectDescriptor findObject(String fullyQualifiedInterfaceName) {
     	
@@ -108,7 +96,6 @@ public class Model implements Displayable {
 
     /**
      * Adds an Enum to the Model. 
-     * @param enumDescriptor
      */
     public void addEnum(EnumDescriptor enumDescriptor) {
     	Assert.check(enumDescriptor != null, "enumDescriptor != null");
@@ -126,11 +113,6 @@ public class Model implements Displayable {
     public Map<String, EnumDescriptor> getEnums() {
         return enums;
     }
-    /*
-    public void setEnums(Map<String, EnumDescriptor> newEnums) {
-        enums = newEnums;
-    }
-    */
 
 
     public void addService(ServiceDescriptor serviceDescriptor) {
@@ -143,47 +125,12 @@ public class Model implements Displayable {
 
         Assert.check(previous == null, "Duplicate Service \"" + remoteName + "\" found in Model");
     }
+
     /**
-     * 
-     * @return
+     * Return map of the service in the model.
      */
     public Map<String, ServiceDescriptor> getServices() {
         return services;
     }
-    /*
-    public void setServices(Map<String, ServiceDescriptor> newServices) {
-        services = newServices;
-    }
-    */
-    
-    // Displayable interface methods
-    public String display() {
-        return display ("");
-    }
-    
-    public String display(String objectDescription) {
-        Map<Object,Displayable> displayedObjects = new HashMap<Object,Displayable>();
-        return display (objectDescription, 0, 0, displayedObjects);
-    }
-    
-    public String display(String objectDescription, int level, int maxLevels, Map<Object,Displayable> displayedObjects) {
-        DisplayBuffer displayBuffer = DisplayBuffer.newInstance("Model", objectDescription, level, maxLevels);
-        if (displayBuffer == null) {
-            return "";
-        }
-        
-        displayBuffer.append("Objects:");
-        for (ObjectDescriptor objectDescriptor : objects.values()) {
-            displayBuffer.append(objectDescriptor.display("", level+1, maxLevels, displayedObjects));
-        }
-        
-        displayBuffer.append("Services:");
-        for (ServiceDescriptor serviceDescriptor : services.values()) {
-            displayBuffer.append(serviceDescriptor.display("", level+1, maxLevels, displayedObjects));
-        }
-        
-        return displayBuffer.toString();
-        
-    }
-    
+
 }

@@ -1,26 +1,17 @@
-/*
- * FieldDescriptor.java
+/* FieldDescriptor.java
  *
- * Created on January 30, 2003, 5:12 AM
- * Copyright 2002-2005 Kevin Delargy.
+ * Copyright 2002-2024 Kevin Delargy.
  */
 
 package com.modelgenerated.modelmetadata;
 
-import com.modelgenerated.foundation.debug.Displayable;
-import com.modelgenerated.foundation.debug.DisplayBuffer;
 import com.modelgenerated.foundation.logging.Logger;
 import com.modelgenerated.util.Assert;
 import com.modelgenerated.util.StringUtil;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Describes a field within an objects. 
  * 
- * 
- * @author  kevind
  */
 public class FieldDescriptor {
     private ObjectDescriptor parentObject;
@@ -60,7 +51,6 @@ public class FieldDescriptor {
     /**
      * A description of this fields.
      * This is used to generate javadoc comments
-     * @return
      */
     public String getDescription() {
         return description;
@@ -72,7 +62,6 @@ public class FieldDescriptor {
     /**
      * The column name to use to generate database and dao code for persisted objects
      * For joined fields this will be <tablename>.<columnname>
-     * @return
      */
     public String getColumnName() {
         return columnName;
@@ -80,9 +69,9 @@ public class FieldDescriptor {
     public void setColumnName(String newColumnName) {
         columnName = newColumnName;
     }
+
     /**
      * For joined fields this separates off the leading column names and returns the columnname 
-     * @return
      */
     public String getRealColumnName() {
         String delimiter = "\\x2E"; // dot separated.
@@ -95,7 +84,6 @@ public class FieldDescriptor {
     
     /** 
      * The type of this column
-     * @return
      */
     public FieldTypeEnum getType() {
         return type;
@@ -104,9 +92,9 @@ public class FieldDescriptor {
     public void setType(FieldTypeEnum newType) {
         type = newType;
     }
-    /** 
+
+    /**
      * This is only used for FieldDescriptors of type=FieldTypeEnum.READONLYJOIN. 
-     * @return
      */
     public String getJoinField() {
         return joinField;
@@ -119,7 +107,6 @@ public class FieldDescriptor {
     /** 
      * For fields that reference other objects, this is the alias to use if a join needs to be performed.  
      * For read only joins this is the alias on the field that is being used to perform the join.
-     * @return
      */
     public String getAlias() {
     	if (getType() == FieldTypeEnum.READONLYJOIN) {
@@ -138,7 +125,6 @@ public class FieldDescriptor {
      * This field is optional. If it is missing for a join object then the joined object is read to get the table name. 
      * This field is needed when this model needs to join objects in another model.   
      * For read only joins this is the Table off the field that is being used to perform the join
-     * @return
      */
     public String getTableName() {
         return tableName;
