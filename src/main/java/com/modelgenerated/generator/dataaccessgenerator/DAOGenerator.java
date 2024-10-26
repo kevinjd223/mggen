@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * Generate DAO class.
- * Generates methods to
+ * Generates methods to Create, Read, Update, Delete (CRUD) for the object.
  *
  * @author  kevind
  */
@@ -55,13 +55,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
     }
     
     protected boolean shouldGenerate() {
-        if (!super.shouldGenerate()) {
-            return false;
-        }
-        if (!objectDescriptor.getPersisted()) {
-            return false;
-        }
-        return true;
+        return super.shouldGenerate() && objectDescriptor.getPersisted();
     }
     
     protected void generateHeader() {
@@ -481,7 +475,12 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         code.addLine(" = ? \");");
 
-        code.addLine("        sql.append(\"where id = ?\");");
+        if (objectDescriptor.getMultiTenant()) {
+            code.addLine("        sql.append(\"where tid = ? \");");
+            code.addLine("        sql.append(\"and id = ?\");");
+        } else {
+            code.addLine("        sql.append(\"where id = ?\");");
+        }
     }
     
     private void generateNewValueObject() {
@@ -654,7 +653,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine("    }");
     }
 
-    private String addJoins(ObjectDescriptor objectDescriptor) {
+    private void addJoins(ObjectDescriptor objectDescriptor) {
         JoinList joinList = objectDescriptor.getJoins();
 
         for (JoinDescriptor joinDescriptor : joinList) {
@@ -664,8 +663,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
             code.add(" and " + joinDescriptor.leftAlias + "." + joinDescriptor.leftColumn);
             code.addLine(" = " + joinDescriptor.rightAlias + "." + joinDescriptor.rightColumn + ") \");");
         }
-
-        return null;
     }
 
     private String findAliasForJoinColumn(FieldDescriptor findField) {
@@ -706,10 +703,13 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
             code.addLine("            sql.append(\"inner join " +  baseObjectDescriptor.getTableName() + " as " + baseTableAlias + " on " + objectTableAlias + ".id = " + baseTableAlias + ".id \");");            
         }
 
-        code.addLine("            sql.append(\"where " + objectTableAlias + ".id = ? \");");
+        if (objectDescriptor.getMultiTenant()) {
+            code.addLine("            sql.append(\"where " + objectTableAlias + ".tid = ? \");");
+            code.addLine("            sql.append(\"and " + objectTableAlias + ".id = ? \");");
+        } else {
+            code.addLine("            sql.append(\"where " + objectTableAlias + ".id = ? \");");
+        }
 
-        
-        
         //code.addLine("            Logger.debug(this, \"sql: \" + sql.toString());");
         code.addLine("            Logger.debug(this, \"select without joins from " + openEncapsulate + objectDescriptor.getTableName() + closeEncapsulate +"\");");
         code.addLine("            Logger.debug(this, sql);");
@@ -718,9 +718,14 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine();
         
         code.addLine();
-        code.addLine("            statement.setBytes(1, id.getByteValue());");
 
-        
+        if (objectDescriptor.getMultiTenant()) {
+            code.addLine("            statement.setBytes(1, transactionContext.getUserContext().getTenantId().getByteValue());");
+            code.addLine("            statement.setBytes(2, id.getByteValue());");
+        } else {
+            code.addLine("            statement.setBytes(1, id.getByteValue());");
+        }
+
         code.addLine("            resultSet = statement.executeQuery();");                
 
         ClassDescriptor valueObjectDescriptor = objectDescriptor.getValueObjectInterface();
@@ -732,7 +737,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine("            Map<Identity,ValueObject> loadedObjects = new HashMap<Identity,ValueObject>();");
         code.addLine("            " + listInterfaceName + " " + listInterfaceVariable +  " = get" + listInterfaceName +  "FromResultSet(transactionContext, resultSet, loadedObjects);");
 
-        
         code.addLine("            Assert.check(" + listInterfaceVariable + ".size() <= 1, \"" + listInterfaceVariable + ".size() <= 1\");");
 
         code.addLine("            " + valueObjectInterfaceName +  " "  + valueObjectVariable +  " = null;");
@@ -774,7 +778,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.add    ("            " + listInterfaceName + " " + listInterfaceVariable);
         code.addLine(" = (" + listInterfaceName + ")Factory.createObject(" + listInterfaceName + ".class);");
         code.addLine();
-        
 
         code.addLine("            while (resultSet.next()) {");
 
@@ -810,7 +813,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         index = generateReadOnlySetLines(objectDescriptor, valueObjectVariable, index);
         code.addLine();
-        
 
         code.addLine("                    " + valueObjectVariable + ".setIsNew(false);");
         code.addLine("                    " + valueObjectVariable + ".setIsDirty(false);");
@@ -995,18 +997,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
                 code.add    ("            JDBCUtil.setStatement(statement, ");
                 code.add    (index++ + ", SubObjectHelper.getSubObjectId(" + valueObjectName);
                 code.addLine(", \"" + field.getName() + "Id\"), " + field.getNullable() + ");");
-            /*
-            } else if (field.getType() == FieldTypeEnum.ENUM) {
-                String varName = field.getJavaVariableName();
-                code.addLine("            " + field.getJavaType() + " " + varName + " = " + valueObjectName + ".get" + field.getName() + "();");
-                
-                code.addLine("            if (" + varName + " != null) { ");
-                code.addLine("                JDBCUtil.setStatement(statement, " + index + ", " + varName + ".toString(), 30);");
-                code.addLine("            } else { ");
-                code.addLine("                JDBCUtil.setStatement(statement, " + index + ", (String)null, 30);");
-                code.addLine("            }");                
-                index++;
-            */
             } else if (field.getType() == FieldTypeEnum.STRING) {
                 code.add    ("            JDBCUtil.setStatement(statement, ");
                 code.add    (index++ + ", ");
@@ -1095,18 +1085,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
                 code.add    ("            JDBCUtil.setStatement(statement, ");
                 code.add    (index++ + ", SubObjectHelper.getSubObjectId(" + valueObjectName);
                 code.addLine(", \"" + field.getName() + "Id\"), " + field.getNullable() + ");");
-            /*
-            } else if (field.getType() == FieldTypeEnum.ENUM) {
-                String varName = field.getJavaVariableName();
-                code.addLine("            " + field.getJavaType() + " " + varName + " = " + valueObjectName + ".get" + field.getName() + "();");
-                
-                code.addLine("            if (" + varName + " != null) { ");
-                code.addLine("                JDBCUtil.setStatement(statement, " + index + ", " + varName + ".toString(), 30);");
-                code.addLine("            } else { ");
-                code.addLine("                JDBCUtil.setStatement(statement, " + index + ", (String)null, 30);");
-                code.addLine("            }");                
-                index++;
-            */
             } else {
                 code.add    ("            JDBCUtil.setStatement(statement, ");
                 code.add    (index++ + ", ");
@@ -1427,11 +1405,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine("            sql.append(\"select \");");
         code.addLine("            sql.append(getVendorSpecificRowLimitPrefix(connection, searchCriteria.getTopAmount()));");
 
-        //code.addLine("            if (searchCriteria.getTopAmount() > 0) {");
-        //code.addLine("                sql.append(\"top \");");
-        //code.addLine("                sql.append(searchCriteria.getTopAmount());");
-        //code.addLine("                sql.append(\" \");");
-        //code.addLine("            }");
         code.addLine("            sql.append(sqlSelect);");
         code.addLine("            sql.append(\"from " + openEncapsulate + objectDescriptor.getTableName() + closeEncapsulate +" as " + objectTableAlias + " \");");
         if (baseObjectDescriptor != null) {
@@ -1463,8 +1436,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
 
         code.addLine("            sql.append(searchCriteria.getOrderBy());");      
         code.addLine("            sql.append(getVendorSpecificRowLimitPostfix(connection, searchCriteria.getTopAmount()));");
-        
-        
+
         code.addLine("            Logger.debug(this, \"select from " + openEncapsulate + objectDescriptor.getTableName() + closeEncapsulate + "\");");        
         code.addLine("            Logger.debug(this, sql);");
         code.addLine("            PreparedStatement statement = connection.prepareStatement(sql.toString());");
@@ -1481,13 +1453,9 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine("            ResultSet resultSet = statement.executeQuery();");                
         code.addLine();
         
-        
         code.addLine("            " + listInterfaceName + " " + listVariableName + " = get" + listInterfaceName +  "FromResultSet(transactionContext, resultSet, loadedObjects);");
 
         code.addLine("            if (deepCopy) {");
-        //code.addLine("                Iterator i = " + listVariableName + ".iterator();");
-        //code.addLine("                while (i.hasNext()) {");
-        //code.addLine("                    " + voInterfaceName + " " + voVariableName + " = (" + voInterfaceName + ")i.next();");
         code.addLine("                for (" + voInterfaceName + " " + voVariableName + " : " + listVariableName + ") {");
         code.addLine("                    loadChildren(transactionContext, " + voVariableName + ", loadedObjects);");
         code.addLine("                }");
@@ -1502,8 +1470,6 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
     }
 
     private void generateUserContextSearchCount() {
-        //ClassDescriptor valueObjectDescriptor = objectDescriptor.getValueObjectInterface();
-        String listInterfaceName = objectDescriptor.getListInterface().getClassName();
         code.addLine("    public int searchCount(UserContext userContext, SearchCriteria searchCriteria) {");
         code.addLine("        Assert.check(userContext != null, \"userContext != null\");");
         code.addLine("        TransactionContext transactionContext = new TransactionContext(userContext);");
@@ -1556,11 +1522,8 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         addJoins(objectDescriptor);
 
-
         code.addLine("            searchCriteria.setPreviousAlias(\"" + previousAlias + "\");");
         code.addLine("            sql.append(searchCriteria.getFromClause());");
-
-        //code.addLine("            sql.append(\"where \");");
 
         code.addLine("            String whereClause = searchCriteria.getWhereClause();");
         if (objectDescriptor.getMultiTenant()) {
@@ -1654,19 +1617,15 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
                     code.addLine("        Identity " + valueObjectIdName + " = SubObjectHelper.getSubObjectId(" + valueObject + ", \"" + field.getName() + "Id\");");                
                     code.addLine("        if (" + valueObjectIdName + " != null) {");                
                     
-                    // LookupData lookupData = (ContactInfo)contactInfoDAO.find(transactionContext, SubObjectHelper.getSubObjectId(company, "ContactInfoId")));
-                    code.addLine("            " + childValueClass + " " + childValueObject + " = (" + childValueClass + ")loadedObjects.get(" + valueObjectIdName + ");");                
+                    code.addLine("            " + childValueClass + " " + childValueObject + " = (" + childValueClass + ")loadedObjects.get(" + valueObjectIdName + ");");
                     code.addLine("            if (" + childValueObject + " == null) {");                
                     
-                    // lookupDataDAO = (LookupDataDAO)DataAccessLocator.findDAO("com.modelgenerated.lookup.LookupData");
-                    code.addLine("                " + daoInterface + " " + daoVariableName + " = (" + daoInterface + ")DataAccessLocator.findDAO(\"" + field.getClassDescriptor().getFQN() + "\");");                
+                    code.addLine("                " + daoInterface + " " + daoVariableName + " = (" + daoInterface + ")DataAccessLocator.findDAO(\"" + field.getClassDescriptor().getFQN() + "\");");
 
-                    // LookupData lookupData = (ContactInfo)contactInfoDAO.find(transactionContext, SubObjectHelper.getSubObjectId(company, "ContactInfoId")));
-                    code.addLine("                " + childValueObject + " = (" + childValueClass + ")" + daoVariableName + ".find(transactionContext, " + valueObjectIdName + ", loadedObjects);");                
+                    code.addLine("                " + childValueObject + " = (" + childValueClass + ")" + daoVariableName + ".find(transactionContext, " + valueObjectIdName + ", loadedObjects);");
                     code.addLine("            }");                
                     
-                    // company.setContactInfo(lookupData);
-                    code.addLine("            " + valueObject + ".set" + field.getName() + "(" + childValueObject + ");");                
+                    code.addLine("            " + valueObject + ".set" + field.getName() + "(" + childValueObject + ");");
                     code.addLine("        }");                
                     code.addLine();
                 }
@@ -1742,8 +1701,7 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         code.addLine("        } catch (ObjectNotLoadedException e) {}");
         code.addLine("        if (" + voVariable + " != null) {");                
 
-        // LookupDataDAO lookupDataDAO = (LookupDataDAO)DataAccessLocator.findDAO("com.modelgenerated.lookup.LookupData");
-        code.addLine("            " + daoInterface + " " + daoVariableName + " = (" + daoInterface + ")DataAccessLocator.findDAO(\"" + fieldClassFQN + "\");");                
+        code.addLine("            " + daoInterface + " " + daoVariableName + " = (" + daoInterface + ")DataAccessLocator.findDAO(\"" + fieldClassFQN + "\");");
 
         code.addLine("            " + daoVariableName + ".save(transactionContext, " + voVariable + ", savedObjects);");                
         code.addLine("        }");                
