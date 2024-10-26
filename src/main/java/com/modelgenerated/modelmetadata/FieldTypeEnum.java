@@ -20,13 +20,15 @@ public class FieldTypeEnum {
     public static final FieldTypeEnum DOUBLE = new FieldTypeEnum("Double");
     public static final FieldTypeEnum ENUM = new FieldTypeEnum("Enum");
     public static final FieldTypeEnum IDENTITY = new FieldTypeEnum("Identity");
+    public static final FieldTypeEnum INSTANT = new FieldTypeEnum("Instant");
     public static final FieldTypeEnum INT = new FieldTypeEnum("int");
 	public static final FieldTypeEnum INTEGER = new FieldTypeEnum("Integer");
+    public static final FieldTypeEnum LOCALDATE = new FieldTypeEnum("LocalDate");
     public static final FieldTypeEnum READONLYJOIN = new FieldTypeEnum("ReadOnlyJoin");
     public static final FieldTypeEnum STRING = new FieldTypeEnum("String");
     public static final FieldTypeEnum TEXT = new FieldTypeEnum("Text");
     
-    private static FieldTypeEnum[] list = {BOOLEAN, CLASS, COALESCE, DATE, DATETIME, DOUBLE, ENUM, IDENTITY, INT, INTEGER, READONLYJOIN, STRING, TEXT};
+    private static FieldTypeEnum[] list = {BOOLEAN, CLASS, COALESCE, DATE, DATETIME, DOUBLE, ENUM, IDENTITY, INSTANT, INT, INTEGER, LOCALDATE, READONLYJOIN, STRING, TEXT};
     private String value;
     
     /** Creates a new instance of FieldTypeEnum */

@@ -156,12 +156,18 @@ public abstract class CreateTableGenerator implements CodeGenerator {
             } else if (field.getType() == FieldTypeEnum.IDENTITY) {
                 commaIfNeeded(fieldCount++);
                 code.add("    " + field.getColumnName() + " " + getBinaryType());
-			} else if (field.getType() == FieldTypeEnum.INT) {
-				commaIfNeeded(fieldCount++);
-				code.add("    " + field.getColumnName() + " integer");
+            } else if (field.getType() == FieldTypeEnum.INSTANT) {
+                commaIfNeeded(fieldCount++);
+                code.add("    " + field.getColumnName() + " datetime");
+            } else if (field.getType() == FieldTypeEnum.INT) {
+                commaIfNeeded(fieldCount++);
+                code.add("    " + field.getColumnName() + " integer");
 			} else if (field.getType() == FieldTypeEnum.INTEGER) {
 				commaIfNeeded(fieldCount++);
 				code.add("    " + field.getColumnName() + " integer");
+            } else if (field.getType() == FieldTypeEnum.LOCALDATE) {
+                commaIfNeeded(fieldCount++);
+                code.add("    " + field.getColumnName() + " date");
             } else if (field.getType() == FieldTypeEnum.READONLYJOIN) {
                 // do nothing
             } else if (field.getType() == FieldTypeEnum.COALESCE) {

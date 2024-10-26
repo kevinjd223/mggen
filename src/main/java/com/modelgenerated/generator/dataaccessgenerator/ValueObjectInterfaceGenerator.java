@@ -113,8 +113,17 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
                 importGenerator.addImport(parameterType.getFQN());
             }
         }
-        importGenerator.addImport("java.util.Date");
-        
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.DATE)
+                ||objectDescriptor.hasFieldType(FieldTypeEnum.DATETIME)) {
+            importGenerator.addImport("java.util.Date");
+        }
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.INSTANT)) {
+            importGenerator.addImport("java.time.Instant");
+        }
+        if (objectDescriptor.hasFieldType(FieldTypeEnum.LOCALDATE)) {
+            importGenerator.addImport("java.time.LocalDate");
+        }
+
         
 		code.add(importGenerator.getImports(objectDescriptor.getValueObjectInterface().getPackage()));
 		code.addLine();
