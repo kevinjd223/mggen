@@ -100,7 +100,6 @@ public class FieldDescriptorReadOnlyTest extends TestCase {
         
         FieldDescriptor joinedFieldDescriptor = objectThreeFieldTwo.getJoinedFieldDescriptor();
         Logger.debug(this, "joinedFieldDescriptor");
-        Logger.debug(this, joinedFieldDescriptor.display());
         assertTrue("joinedFieldDescriptor.equals(contactNameFieldDescriptor)", joinedFieldDescriptor.equals(contactNameFieldDescriptor));
         
         assertTrue("joinedFieldDescriptor.equals(contactNameFieldDescriptor)", joinedFieldDescriptor.equals(contactNameFieldDescriptor));
@@ -110,7 +109,6 @@ public class FieldDescriptorReadOnlyTest extends TestCase {
         // this is going away
         FieldDescriptor joinedFieldAlias = objectThreeFieldTwo.getJoinedFieldAlias();
         Logger.debug(this, "joinedFieldAlias");
-        Logger.debug(this, joinedFieldAlias.display());
 
         
         //assertTrue("id should equal id", account3.getId().equals(id));
