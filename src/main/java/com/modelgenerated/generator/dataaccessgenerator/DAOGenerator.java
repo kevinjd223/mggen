@@ -1094,7 +1094,9 @@ public class DAOGenerator extends JavaCodeBaseGenerator {
         }
         
         code.addLine("            // where clause");
-        code.addLine("            JDBCUtil.setStatement(statement, " + index++ + ", transactionContext.getUserContext().getTenantId(), false);");
+        if (objectDescriptor.getMultiTenant()) {
+            code.addLine("            JDBCUtil.setStatement(statement, " + index++ + ", transactionContext.getUserContext().getTenantId(), false);");
+        }
         code.addLine("            JDBCUtil.setStatement(statement, " + index + ", " + valueObjectName + ".getId(), false);");
         code.addLine();
         
