@@ -8,9 +8,9 @@
 package com.modelgenerated.modelmetadata.xml;
 
 
+import com.modelgenerated.foundation.EjbVersionEnum;
 import com.modelgenerated.generator.GeneratorException;
 import com.modelgenerated.modelmetadata.Model;
-import com.modelgenerated.modelmetadata.service.EjbVersionEnum;
 import com.modelgenerated.modelmetadata.service.ServiceDescriptor;
 import com.modelgenerated.modelmetadata.service.CrudObject;
 import com.modelgenerated.util.Assert;

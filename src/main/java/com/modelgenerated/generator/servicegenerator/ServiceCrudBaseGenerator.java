@@ -7,14 +7,12 @@
 
 package com.modelgenerated.generator.servicegenerator;
 
+import com.modelgenerated.foundation.EjbVersionEnum;
 import com.modelgenerated.foundation.config.ConfigLocator;
 import com.modelgenerated.generator.java.ImportGenerator;
 import com.modelgenerated.modelmetadata.ClassDescriptor;
 import com.modelgenerated.modelmetadata.Model;
 import com.modelgenerated.modelmetadata.ObjectDescriptor;
-import com.modelgenerated.modelmetadata.FieldDescriptor;
-import com.modelgenerated.modelmetadata.ReferenceDescriptor;
-import com.modelgenerated.modelmetadata.service.EjbVersionEnum;
 import com.modelgenerated.modelmetadata.service.ServiceDescriptor;
 import com.modelgenerated.modelmetadata.service.CrudObject;
 import com.modelgenerated.foundation.logging.Logger;
@@ -25,11 +23,6 @@ import com.modelgenerated.util.FileUtil;
 import com.modelgenerated.util.StringUtil;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Generates Service base class with Crud methods
@@ -158,12 +151,6 @@ public class ServiceCrudBaseGenerator {
     private void generateClass() {
     	// TODO: don't make it abstract if there are no methods
         code.add("public class " + beanBaseClass.getClassName());
-        if (EjbVersionEnum.EJB2 == serviceDescriptor.getEjbVersion()) {
-        	code.add(" implements javax.ejb.SessionBean");
-        } else {
-        	//code.add(" implements ");
-        	//code.add(remoteInterfaceClass.getClassName());
-        }
         code.addLine("  {");
 
         for (CrudObject crudObject : serviceDescriptor.getCrudObjects()) {
@@ -256,34 +243,10 @@ public class ServiceCrudBaseGenerator {
             }
         }        
         
-        generateSessionBeanMethods();
-        
         code.addLine("}");
     }
     
     
-    private void generateSessionBeanMethods() {
-        if (EjbVersionEnum.EJB2 == serviceDescriptor.getEjbVersion()) {
-	    	code.addLine();
-	        code.addLine("    // SessionBean stuff ");
-	        code.addLine("    public void ejbCreate() {");
-	        code.addLine("    }");
-	        code.addLine();    
-	        code.addLine("    public void ejbActivate() throws javax.ejb.EJBException, java.rmi.RemoteException {");
-	        code.addLine("    }");
-	        code.addLine();    
-	        code.addLine("    public void ejbPassivate() throws javax.ejb.EJBException, java.rmi.RemoteException {");
-	        code.addLine("    }");
-	        code.addLine();
-	        code.addLine("    public void ejbRemove() throws javax.ejb.EJBException, java.rmi.RemoteException {");
-	        code.addLine("    }");
-	        code.addLine();
-	        code.addLine("    public void setSessionContext(javax.ejb.SessionContext sessionContext) throws javax.ejb.EJBException, java.rmi.RemoteException {");
-	        code.addLine("    }");
-	        code.addLine();
-        }
-    }
-
 
     
 }

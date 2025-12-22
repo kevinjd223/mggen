@@ -16,7 +16,6 @@ import com.modelgenerated.modelmetadata.Model;
 import com.modelgenerated.modelmetadata.Parameter;
 import com.modelgenerated.modelmetadata.Prototype;
 import com.modelgenerated.modelmetadata.ObjectDescriptor;
-import com.modelgenerated.modelmetadata.service.EjbVersionEnum;
 import com.modelgenerated.modelmetadata.service.ServiceDescriptor;
 import com.modelgenerated.modelmetadata.service.CrudObject;
 import com.modelgenerated.foundation.logging.Logger;
@@ -117,10 +116,6 @@ public class ServiceInterfaceGenerator {
         importGenerator.addImport("com.modelgenerated.foundation.dataaccess.SearchCriteria");
         importGenerator.addImport("com.modelgenerated.foundation.dataaccess.UserContext");
         importGenerator.addImport("com.modelgenerated.foundation.identity.Identity");
-    	if (EjbVersionEnum.EJB2 == serviceDescriptor.getEjbVersion()) {
-    		importGenerator.addImport("java.rmi.RemoteException");
-    		importGenerator.addImport("javax.ejb.EJBObject");
-    	}
 
         for (CrudObject crudObject : serviceDescriptor.getCrudObjects()) {
             ObjectDescriptor objectDescriptor = model.findObject(crudObject.getName());
@@ -167,9 +162,6 @@ public class ServiceInterfaceGenerator {
     private void generateClass() {
         
     	code.add("public interface " + remoteInterfaceClass.getClassName());
-    	if (EjbVersionEnum.EJB2 == serviceDescriptor.getEjbVersion()) {
-        	code.add(" extends javax.ejb.EJBObject");
-    	}
     	code.addLine(" {");
 
 
@@ -191,57 +183,43 @@ public class ServiceInterfaceGenerator {
             code.addLine("    // crud methods for " + valueObjectClassName);
             code.addLine("    // ****************************** ");
             
-        	if (EjbVersionEnum.EJB2 == serviceDescriptor.getEjbVersion()) {
-	            code.addLine("    " + valueObjectClassName + " new" + valueObjectClassName + "(UserContext userContext) throws RemoteException;");            
-	            if (crudObject.getGenerateListMethods()) {
-	                code.addLine("    " + listObjectClassName + " new" + listObjectClassName + "(UserContext userContext) throws RemoteException;");
-	            }            
-	            code.addLine("    " + valueObjectClassName + " find" + valueObjectClassName + "(UserContext userContext, String idString) throws RemoteException;");
-	            code.addLine("    " + valueObjectClassName + " find" + valueObjectClassName + "(UserContext userContext, Identity id) throws RemoteException;");
-	            code.addLine("    void save" + valueObjectClassName + "(UserContext userContext, " + valueObjectClassName + " " + valueObjectVariableName + ") throws RemoteException;");
-	            if (crudObject.getGenerateSearchMethod()) {
-                    code.addLine("    " + listObjectClassName + " " + valueObjectVariableName + "Search(UserContext userContext, SearchCriteria searchCriteria) throws RemoteException;");
-                    code.addLine("    int " + valueObjectVariableName + "SearchCount(UserContext userContext, SearchCriteria searchCriteria) throws RemoteException;");
-	            }
-        	} else {
-	            code.addLine("    /**");
-	            code.addLine("     * CRUD method to create a new " + valueObjectClassName + ".");            
-	            code.addLine("     */");
-	            code.addLine("    " + valueObjectClassName + " new" + valueObjectClassName + "(UserContext userContext);");            
+            code.addLine("    /**");
+            code.addLine("     * CRUD method to create a new " + valueObjectClassName + ".");
+            code.addLine("     */");
+            code.addLine("    " + valueObjectClassName + " new" + valueObjectClassName + "(UserContext userContext);");
 
-	            if (crudObject.getGenerateListMethods()) {
-		            code.addLine("    /**");
-		            code.addLine("     * CRUD method to create a new " + listObjectClassName + ".");            
-		            code.addLine("     */");
-	                code.addLine("    " + listObjectClassName + " new" + listObjectClassName + "(UserContext userContext);");
-	            }            
-	            
-	            code.addLine("    /**");
-	            code.addLine("     * CRUD method to read a " + valueObjectClassName + " by Id.");            
-	            code.addLine("     */");
-	            code.addLine("    " + valueObjectClassName + " find" + valueObjectClassName + "(UserContext userContext, String idString)" + crudObject.getFindByIdThrowStatement() + ";");
+            if (crudObject.getGenerateListMethods()) {
+                code.addLine("    /**");
+                code.addLine("     * CRUD method to create a new " + listObjectClassName + ".");
+                code.addLine("     */");
+                code.addLine("    " + listObjectClassName + " new" + listObjectClassName + "(UserContext userContext);");
+            }
 
-	            code.addLine("    /**");
-	            code.addLine("     * CRUD method to read a " + valueObjectClassName + " by Id as a String.");            
-	            code.addLine("     */");
-	            code.addLine("    " + valueObjectClassName + " find" + valueObjectClassName + "(UserContext userContext, Identity id)" + crudObject.getFindByIdThrowStatement() + ";");
+            code.addLine("    /**");
+            code.addLine("     * CRUD method to read a " + valueObjectClassName + " by Id.");
+            code.addLine("     */");
+            code.addLine("    " + valueObjectClassName + " find" + valueObjectClassName + "(UserContext userContext, String idString)" + crudObject.getFindByIdThrowStatement() + ";");
 
-	            code.addLine("    /**");
-	            code.addLine("     * CRUD method to update a " + valueObjectClassName + ".");            
-	            code.addLine("     */");
-	            code.addLine("    void save" + valueObjectClassName + "(UserContext userContext, " + valueObjectClassName + " " + valueObjectVariableName + ");");
-	            if (crudObject.getGenerateSearchMethod()) {
-		            code.addLine("    /**");
-		            code.addLine("     * CRUD method to read/search for a list of " + valueObjectClassName + ".");            
-		            code.addLine("     */");
-	                code.addLine("    " + listObjectClassName + " " + valueObjectVariableName + "Search(UserContext userContext, SearchCriteria searchCriteria);");
-                    code.addLine("    /**");
-                    code.addLine("     * CRUD method. Returns count of rows returned by searchCriterid.");
-                    code.addLine("     */");
-                    code.addLine("    int " + valueObjectVariableName + "SearchCount(UserContext userContext, SearchCriteria searchCriteria);");
-	            }
-        	}
-        }        
+            code.addLine("    /**");
+            code.addLine("     * CRUD method to read a " + valueObjectClassName + " by Id as a String.");
+            code.addLine("     */");
+            code.addLine("    " + valueObjectClassName + " find" + valueObjectClassName + "(UserContext userContext, Identity id)" + crudObject.getFindByIdThrowStatement() + ";");
+
+            code.addLine("    /**");
+            code.addLine("     * CRUD method to update a " + valueObjectClassName + ".");
+            code.addLine("     */");
+            code.addLine("    void save" + valueObjectClassName + "(UserContext userContext, " + valueObjectClassName + " " + valueObjectVariableName + ");");
+            if (crudObject.getGenerateSearchMethod()) {
+                code.addLine("    /**");
+                code.addLine("     * CRUD method to read/search for a list of " + valueObjectClassName + ".");
+                code.addLine("     */");
+                code.addLine("    " + listObjectClassName + " " + valueObjectVariableName + "Search(UserContext userContext, SearchCriteria searchCriteria);");
+                code.addLine("    /**");
+                code.addLine("     * CRUD method. Returns count of rows returned by searchCriterid.");
+                code.addLine("     */");
+                code.addLine("    int " + valueObjectVariableName + "SearchCount(UserContext userContext, SearchCriteria searchCriteria);");
+            }
+        }
         List<Method> methodList = serviceDescriptor.getMethods();
         if (methodList.size() > 0) {
             code.addLine();
@@ -252,9 +230,6 @@ public class ServiceInterfaceGenerator {
             
             String prototype = method.getMethodNameAndParameters();
             code.add("    " + prototype);
-        	if (EjbVersionEnum.EJB2 == serviceDescriptor.getEjbVersion()) {
-        		code.add(" throws RemoteException");
-        	}
         	List<ClassDescriptor> exceptionList = method.getPrototype().getExceptionList();
         	if (exceptionList.size() > 0) {
         		code.add(" throws ");

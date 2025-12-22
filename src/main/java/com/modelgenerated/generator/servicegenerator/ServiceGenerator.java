@@ -8,7 +8,6 @@
 package com.modelgenerated.generator.servicegenerator;
 
 import com.modelgenerated.modelmetadata.Model;
-import com.modelgenerated.modelmetadata.service.EjbVersionEnum;
 import com.modelgenerated.modelmetadata.service.ServiceDescriptor;
 import com.modelgenerated.util.Assert;
 
@@ -33,10 +32,6 @@ public class ServiceGenerator {
         ServiceCrudBaseGenerator serviceBeanBaseGenerator = new ServiceCrudBaseGenerator();
         serviceBeanBaseGenerator.generate(model, serviceDescriptor);
         
-        if (EjbVersionEnum.EJB2 == serviceDescriptor.getEjbVersion()) {
-            ServiceHomeGenerator serviceHomeGenerator = new ServiceHomeGenerator();
-            serviceHomeGenerator.generate(model, serviceDescriptor);
-        }
     }
     
 }
