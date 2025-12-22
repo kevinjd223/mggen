@@ -30,16 +30,10 @@ import org.w3c.dom.Element;
  *
  * @author  kevind
  */
-public class GeneratorConfig implements Config, Displayable {
+public class GeneratorConfig implements Config {
     public final static String CONFIG_NAME = "generatorConfig";
 	public final static String ENV_GENERATOR_ROOT = "generator.root";
-    private String strutsConfigFile;
-    private String tilesDefFile;
-    private String resourceFile;
-    private String controllerRoot;
-    private String jspRoot;
-    private String modelLocation; // todo: temporary until model calls screengen
-    private String projectPrototypeDirectory;
+    private String modelLocation;
 
     private String javaCodeFolder;
     private String junitFolder;
@@ -56,26 +50,8 @@ public class GeneratorConfig implements Config, Displayable {
         return CONFIG_NAME;
     }
     
-    public String getStrutsConfigFile() {
-        return strutsConfigFile;        
-    }
-    public String getTilesDefFile() {
-        return tilesDefFile;        
-    }
-    public String getResourceFile() {
-        return resourceFile;        
-    }
-    public String getControllerRoot() {
-        return controllerRoot;        
-    }
-    public String getJspRoot() {
-        return jspRoot;        
-    }
     public String getModelLocation() {
         return modelLocation;        
-    }
-    public String getProjectPrototypeDirectory() {
-        return projectPrototypeDirectory;        
     }
 
     public String getJavaCodeFolder() {
@@ -119,33 +95,9 @@ public class GeneratorConfig implements Config, Displayable {
             Element config = DomUtil.getChildElement(root, "ConfigData");
             Assert.check(config != null, "config != null");
 
-            strutsConfigFile = DomUtil.getChildElementText(config, "StrutsConfigFile");
-            Assert.check(strutsConfigFile != null, "strutsConfigFile != null");
-            strutsConfigFile = generatorRoot + strutsConfigFile; 
-            
-            tilesDefFile = DomUtil.getChildElementText(config, "TilesDefFile");
-            Assert.check(tilesDefFile != null, "tilesDefFile != null");
-            tilesDefFile = generatorRoot + tilesDefFile; 
-            
-            resourceFile = DomUtil.getChildElementText(config, "ResourceFile");
-            Assert.check(resourceFile != null, "resourceFile != null");
-            resourceFile = generatorRoot + resourceFile; 
-            
-            controllerRoot = DomUtil.getChildElementText(config, "ControllerRoot");
-            Assert.check(controllerRoot != null, "controllerRoot != null");
-            controllerRoot = generatorRoot + controllerRoot; 
-            
-            jspRoot = DomUtil.getChildElementText(config, "JspRoot");
-            Assert.check(jspRoot != null, "jspRoot != null");
-            jspRoot = generatorRoot + jspRoot; 
-
             modelLocation = DomUtil.getChildElementText(config, "ModelLocation");
             Assert.check(modelLocation != null, "modelLocation != null");
             modelLocation = generatorRoot + modelLocation; 
-            
-            projectPrototypeDirectory = DomUtil.getChildElementText(config, "ProjectPrototypeDirectory");
-            // Assert.check(projectPrototypeDirectory != null, "projectPrototypeDirectory != null");
-            projectPrototypeDirectory = generatorRoot + projectPrototypeDirectory; 
             
             javaCodeFolder = DomUtil.getChildElementText(config, "JavaCodeFolder");
             Assert.check(javaCodeFolder != null, "javaCodeFolder != null");
@@ -185,37 +137,5 @@ public class GeneratorConfig implements Config, Displayable {
     }    
     
 
-    // Displayable implementation
-    public String display() {
-        return display ("");
-    }
-    
-    public String display(String objectDescription) {
-        Map displayedObjects = new HashMap();
-        return display (objectDescription, 0, 0, displayedObjects);
-    }
-    
-    public String display(String objectDescription, int level, int maxLevels, Map displayedObjects) {
-        DisplayBuffer displayBuffer = DisplayBuffer.newInstance("DataAccessConfig", objectDescription, level, maxLevels);
-        if (displayBuffer == null) {
-            return "";
-        }
-        
-        displayBuffer.addLine(level+1, "strutsConfigFile: " + strutsConfigFile);     
-        displayBuffer.addLine(level+1, "tilesDefFile: " + tilesDefFile);     
-        displayBuffer.addLine(level+1, "resourceFile: " + resourceFile);     
-        displayBuffer.addLine(level+1, "controllerRoot: " + controllerRoot);     
-        displayBuffer.addLine(level+1, "jspRoot: " + jspRoot);     
-        displayBuffer.addLine(level+1, "modelLocation: " + modelLocation);
-        displayBuffer.addLine(level+1, "projectPrototypeDirectory: " + projectPrototypeDirectory);     
-       
-        displayBuffer.addLine(level+1, "javaCodeFolder: " + javaCodeFolder);
-        displayBuffer.addLine(level+1, "junitFolder: " + junitFolder);
-        displayBuffer.addLine(level+1, "testDataFolder: " + testDataFolder);
-        displayBuffer.addLine(level+1, "databaseFolder: " + databaseFolder);
-        
-        return displayBuffer.toString();
-        
-    }
     
 }
