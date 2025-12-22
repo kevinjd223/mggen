@@ -7,6 +7,7 @@
 
 package com.modelgenerated.modelmetadata.service;
 
+import com.modelgenerated.foundation.EjbVersionEnum;
 import com.modelgenerated.modelmetadata.Method;
 import com.modelgenerated.modelmetadata.Model;
 import com.modelgenerated.foundation.debug.Displayable;
