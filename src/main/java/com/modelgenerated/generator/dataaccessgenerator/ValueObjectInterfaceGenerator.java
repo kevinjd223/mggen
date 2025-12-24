@@ -39,7 +39,6 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
 	 *
 	 * override to generate if it has an interface.
 	 */
-
 	protected boolean shouldGenerate() {
 		Logger.debug(this, "in base class shouldGenerate()");
 		if (objectDescriptor.getValueObjectInterface() == null) {
@@ -80,8 +79,6 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
         
         importGenerator.addImport("com.modelgenerated.foundation.dataaccess.FieldAttribute");
         importGenerator.addImport("com.modelgenerated.foundation.dataaccess.ValueObject");
-		importGenerator.addImport("com.modelgenerated.foundation.debug.Displayable");
-        //importGenerator.addImport("com.modelgenerated.foundation.debug.DisplayUtil");
 		importGenerator.addImport("com.modelgenerated.foundation.identity.Identity");
         if (objectDescriptor.hasFieldType(FieldTypeEnum.DATE)
                 || objectDescriptor.hasFieldType(FieldTypeEnum.DATETIME)) {
@@ -139,7 +136,7 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
     @Override
     protected void generateClass() {
         code.addLine();
-        code.add("public interface " + getClassName() + " extends ValueObject, Displayable");
+        code.add("public interface " + getClassName() + " extends ValueObject");
         if (objectDescriptor.getCloneable()) { 
             code.add(", Cloneable");
         }
@@ -176,14 +173,10 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
                 if (!StringUtil.isEmpty(field.getSql())) {
                 	columnReference = "\"" + field.getColumnName() + "\"";              	
                 } else if (field.getType() == FieldTypeEnum.READONLYJOIN) {
-                    //String joinFieldName = field.getJoinField();
-                    //FieldDescriptor joinField = objectDescriptor.findField(joinFieldName);
-                    String alias = field.getAlias();                    
+                    String alias = field.getAlias();
                     columnReference = "\"" + alias + "." + field.getRealColumnName() + "\"";
                 } else if (field.getType() == FieldTypeEnum.COALESCE) {
-                    //String joinFieldName = field.getJoinField();
-                    //FieldDescriptor joinField = objectDescriptor.findField(joinFieldName);
-                    columnReference = "\"" + field.getName() + "\"";                
+                    columnReference = "\"" + field.getName() + "\"";
                 }
                 int length = field.getType() == FieldTypeEnum.STRING ? field.getSize() : 0;
                 
@@ -211,8 +204,6 @@ public class ValueObjectInterfaceGenerator extends JavaCodeBaseGenerator {
                 FieldDescriptor joinedField = field.getJoinedFieldDescriptor();
                 generateFieldGetter(joinedField, field.getName());
                 generateFieldSetter(joinedField, field.getName());            
-            	//generateFieldGetter(joinedField, field.getName());
-                //generateFieldSetter(joinedField, field.getName());            
             } else {
                 generateFieldGetter(field);
                 generateFieldSetter(field);            
