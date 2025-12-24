@@ -54,8 +54,6 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
 			importGenerator.addImport(baseObjectDescriptor.getValueObjectInterface().getFQN());
         }
         
-		importGenerator.addImport("com.modelgenerated.foundation.debug.Displayable");
-		importGenerator.addImport("com.modelgenerated.foundation.debug.DisplayBuffer");
 		importGenerator.addImport("com.modelgenerated.foundation.dataaccess.AbstractValueObject");
         if (objectDescriptor.hasFieldType(FieldTypeEnum.CLASS) || objectDescriptor.hasReferences()) { 
 			importGenerator.addImport("com.modelgenerated.foundation.dataaccess.DataAccessLocator");
@@ -99,8 +97,6 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
 
         }                
 
-        //Logger.debug(this, "generating imports for: " + objectDescriptor.getImplementationName().getFQN()); 
-        //System.out.println("generating imports for: " + objectDescriptor.getImplementationName().getFQN()); 
         Model model = objectDescriptor.getModel();
         for (FieldDescriptor field : objectDescriptor.getFields()) {
             if (field.getType() == FieldTypeEnum.CLASS || field.getType() == FieldTypeEnum.ENUM) {
@@ -148,7 +144,7 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
         if (methodList.size() > 0) {
             abstractDeclaration = "abstract ";
         }
-        code.addLine("public " + abstractDeclaration + "class " + getClassName() + " extends AbstractValueObject implements " + objectDescriptor.getValueObjectInterface().getClassName() + ", Serializable, Displayable {");
+        code.addLine("public " + abstractDeclaration + "class " + getClassName() + " extends AbstractValueObject implements " + objectDescriptor.getValueObjectInterface().getClassName() + ", Serializable {");
 
         ObjectDescriptor baseObjectDescriptor = objectDescriptor.getBaseObjectDescriptor();
         if (baseObjectDescriptor != null) {
@@ -192,9 +188,6 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
 
         } 
 
-        
-        generateDisplayMethods();
-        
         code.addLine("}");
     }
 
@@ -282,11 +275,8 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
 
                 String valueObjectIdName = field.getJavaVariableName() + "Id";
                 
-                // lookupDataDAO = (LookupDataDAO)DataAccessLocator.findDAO("com.modelgenerated.lookup.LookupData");
-                code.addLine("            " + daoInterface + " " + daoVariableName + " = (" + daoInterface + ")DataAccessLocator.findDAO(\"" + field.getClassDescriptor().getFQN() + "\");");                
+                code.addLine("            " + daoInterface + " " + daoVariableName + " = (" + daoInterface + ")DataAccessLocator.findDAO(\"" + field.getClassDescriptor().getFQN() + "\");");
 
-                //code.addLine("            UserContext userContext = new UserContext();");                
-                //code.addLine("            userContext.setTenantId(tenantId);");                
                 code.addLine("            TransactionContext transactionContext = new TransactionContext(this.getUserContext());");
 
                 code.addLine("            Map<Identity,ValueObject> loadedObjects = LoadedObjectVisitor.getLoadedObjects(this);");                
@@ -515,14 +505,7 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
                     String listName = toJavaVariableName(referenceDescriptor.getName());
                     String varType = referenceDescriptor.getTargetClass().getClassName();
                     String varName = referenceDescriptor.getTargetClass().getJavaVariableName();
-                    /*
-                    code.addLine("        if (" + varName + " != null) {");
-                    code.addLine("            i = " + varName + ".iterator();");
-                    code.addLine("            while (i.hasNext()) {");
-                    code.addLine("                referencedList.add(i.next());");            
-                    code.addLine("            }");
-                    code.addLine("        }");
-                    */          
+
                     code.addLine("        if (" + listName  + " != null) {");
                     code.addLine("            for (" + varType + " " + varName + " : " + listName + ") {");
                     code.addLine("                referencedList.add(" + varName + ");");            
@@ -544,98 +527,6 @@ public class ValueObjectGenerator  extends JavaCodeBaseGenerator {
             code.addLine("        return null;");                   
         }
                 
-        code.addLine("    }");
-    }
-    
-    private void generateDisplayMethods() {
-        code.addLine();
-        code.addLine("    // Displayable methods");
-        code.addLine("    @Override");
-        code.addLine("    public String display() {");
-        code.addLine("        return display (\"\");");
-        code.addLine("    }");
-        code.addLine();
-        code.addLine("    @Override");
-        code.addLine("    public String display(String objectDescription) {");
-        code.addLine("        Map<Object,Displayable> displayedObjects = new HashMap<Object,Displayable>();");
-        code.addLine("        return display (objectDescription, 0, 0, displayedObjects);");
-        code.addLine("    }");
-        code.addLine();
-        code.addLine("    @Override");
-        code.addLine("    public String display(String objectDescription, int level, int maxLevels, Map<Object,Displayable> displayedObjects) {");
-        code.addLine("        DisplayBuffer displayBuffer = DisplayBuffer.newInstance(\"" + getClassName() + "\", objectDescription, level, maxLevels);");
-        code.addLine("        if (displayBuffer == null) {");
-        code.addLine("            return \"\";");
-        code.addLine("        }");
-        code.addLine("        if (this.getId() != null && displayedObjects.get(this.getId()) != null) {");
-        code.addLine("            displayBuffer.addLine(level+1, \"id: \" + id);");
-        code.addLine("            return displayBuffer.toString();");
-        code.addLine("        }");
-        code.addLine("        displayedObjects.put(this.getId(), this);");
-
-        code.addLine("        displayBuffer.addLine(level+1, \"id: \" + id);");
-        code.addLine("        displayBuffer.addLine(level+1, \"isDirty: \" + isDirty);");
-        code.addLine("        displayBuffer.addLine(level+1, \"isDeleted: \" + isDeleted);");
-        code.addLine("        displayBuffer.addLine(level+1, \"isNew: \" + isNew);");
-        code.addLine("        displayBuffer.addLine(level+1, \"createdDate: \" + DateUtil.formatDateTime(createdDate));");
-        code.addLine("        displayBuffer.addLine(level+1, \"createdBy: \" + createdBy);");
-        code.addLine("        displayBuffer.addLine(level+1, \"modifiedDate: \" + DateUtil.formatDateTime(modifiedDate));");
-        code.addLine("        displayBuffer.addLine(level+1, \"modifiedBy: \" + modifiedBy);");
-        code.addLine("        displayBuffer.addLine(level+1, \"isJITLoadingEnabled: \" + getIsJITLoadingEnabled());");
-
-        code.addLine("        displayBuffer.addLine(level+1, \"unresolvedReferences: \");");
-        code.addLine("        Iterator<ValueObject> i = unresolvedReferences.values().iterator();");
-        code.addLine("        while (i.hasNext()) {");
-        code.addLine("            ValueObject childObject = (ValueObject)i.next();");
-        code.addLine("            displayBuffer.addLine(level+2, \"id: \" + childObject.getId() + \" class \" + childObject.getClass().getName());");
-        code.addLine("        }");
-
-
-        ObjectDescriptor baseObjectDescriptor = objectDescriptor.getBaseObjectDescriptor();
-        if (baseObjectDescriptor != null) {
-            for (FieldDescriptor field : baseObjectDescriptor.getFields()) {
-                if (field.getType() != FieldTypeEnum.CLASS) {
-                    code.addLine("        displayBuffer.addLine(level+1, \"" + toJavaVariableName(field.getName()) + ": \" + " + toJavaVariableName(field.getName()) + ");");
-                }
-            }
-        }
-
-        for (FieldDescriptor field : objectDescriptor.getFields()) {
-            if (field.getType() != FieldTypeEnum.CLASS) {
-                code.addLine("        displayBuffer.addLine(level+1, \"" + toJavaVariableName(field.getName()) + ": \" + get" + field.getName() + "());");
-            }
-        }
-
-        for (FieldDescriptor field : objectDescriptor.getFields()) {
-            if (field.getType() == FieldTypeEnum.CLASS && field.getPersisted()) {
-                String varName = toJavaVariableName(field.getName());
-                code.addLine("        if (" + varName + " == null) {");
-                if (field.getPersisted() && objectDescriptor.getPersisted()) {
-                    code.addLine("            displayBuffer.addLine(level+1, \"" + varName + "Id: \" + " + varName + "Id);");
-                } else {
-                    code.addLine("            displayBuffer.addLine(level+1, \"" + varName + ": \" + " + varName + ");");
-                }
-                code.addLine("        } else {");
-                code.addLine("            displayBuffer.append(" + varName + ".display(\"" + varName + "\", level+1, maxLevels, displayedObjects));");
-                code.addLine("        }");
-            }
-        }
-
-        for (ReferenceDescriptor referenceDescriptor : objectDescriptor.getReferences()) {
-            if ((referenceDescriptor.getType() == ReferenceTypeEnum.ONE_TO_MANY)
-                || (referenceDescriptor.getType() == ReferenceTypeEnum.ONE_TO_ONE)) {
-                String varName = toJavaVariableName(referenceDescriptor.getName());
-                code.addLine("        if (" + varName + " == null) {");
-                code.addLine("            displayBuffer.addLine(level+1, \"" + varName + ": \" + " + varName + ");");
-                code.addLine("        } else {");
-                code.addLine("            displayBuffer.append(" + varName + ".display(\"" + varName + "\", level+1, maxLevels, displayedObjects));");
-                code.addLine("        }");
-            } else {
-                Assert.check(false, "Unsupported referenceTypeEnum");
-            }
-        }
-
-        code.addLine("        return displayBuffer.toString();");
         code.addLine("    }");
     }
 
