@@ -110,7 +110,7 @@ public class ServiceHomeGenerator {
         code.addLine();
     }
     protected void generateClassJavaDocs() {
-        StringBuffer comment = new StringBuffer(); 
+        StringBuilder comment = new StringBuilder();
         ClassDescriptor serviceClass = new ClassDescriptor(serviceDescriptor.getEjbClassName());
 
         comment.append("Model generated EJB Home class for the EJB service class {@link ");

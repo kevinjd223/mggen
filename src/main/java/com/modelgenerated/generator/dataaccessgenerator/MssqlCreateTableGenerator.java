@@ -44,7 +44,7 @@ public class MssqlCreateTableGenerator extends CreateTableGenerator {
     }
 
     protected void generateIndex(String tableName, String indexName, String columns, boolean unique) {
-    	StringBuffer str = new StringBuffer();
+    	StringBuilder str = new StringBuilder();
     	
     	str.append("create ");
     	if (unique) {
