@@ -65,7 +65,7 @@ public class ValueObjectListInterfaceGenerator extends JavaCodeBaseGenerator  {
     }
 
     protected void generateClassJavaDocs() {
-        StringBuffer comment = new StringBuffer(); 
+        StringBuilder comment = new StringBuilder();
         comment.append("Model generated list class for the class {@link ");
         comment.append(objectDescriptor.getValueObjectInterface().getFQN());
         comment.append(" ");

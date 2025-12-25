@@ -34,7 +34,7 @@ public class ImportGenerator {
     public String getImports(String packageName) {
         Assert.check(packageName != null, "packageName != null");
         
-        StringBuffer strBuf = new StringBuffer();
+        StringBuilder strBuf = new StringBuilder();
         for (String importClassFqn : importSet) {
             ClassDescriptor importClassDescriptor = new ClassDescriptor(importClassFqn);
             Assert.check(importClassDescriptor != null, "importClassDescriptor != null");

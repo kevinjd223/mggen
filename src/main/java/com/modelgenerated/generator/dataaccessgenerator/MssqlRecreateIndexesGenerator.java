@@ -138,7 +138,7 @@ public class MssqlRecreateIndexesGenerator {
     
     
     private String getIndexCreateLine(String indexName, String tableName, String columns, boolean unique, boolean multitenant) {
-    	StringBuffer str = new StringBuffer();
+    	StringBuilder str = new StringBuilder();
     	str.append("create ");
     	if (unique) {
         	str.append("unique ");

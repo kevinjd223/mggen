@@ -40,7 +40,7 @@ public class Method implements Displayable {
     }
     
     public String getMethodNameAndParameters(){
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         String description = this.getDescription();
             
         Prototype prototype = this.getPrototype();

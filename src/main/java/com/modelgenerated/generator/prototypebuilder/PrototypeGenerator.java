@@ -25,7 +25,7 @@ public class PrototypeGenerator {
     }
     
     public String generate(String prototype, Properties properties) {
-        StringBuffer output = new StringBuffer(prototype);
+        StringBuilder output = new StringBuilder(prototype);
         
         Logger.debug(this, "generate");
         
