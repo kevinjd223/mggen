@@ -112,16 +112,9 @@ public class ServiceCrudBaseGenerator {
         importGenerator.addImport("com.modelgenerated.foundation.identity.Identity");
         importGenerator.addImport("com.modelgenerated.foundation.identity.IdentityBuilder");
 
-        if (EjbVersionEnum.EJB3 == serviceDescriptor.getEjbVersion()) {
-            //importGenerator.addImport("javax.ejb.EJB");
-			//importGenerator.addImport("javax.ejb.Stateless");
-			importGenerator.addImport("javax.ejb.TransactionAttribute");
-			importGenerator.addImport("javax.ejb.TransactionAttributeType");
-        } else {
-            importGenerator.addImport("java.rmi.RemoteException");
-            importGenerator.addImport("javax.ejb.SessionBean");
-        }
-        
+        importGenerator.addImport("jakarta.ejb.TransactionAttribute");
+        importGenerator.addImport("jakarta.ejb.TransactionAttributeType");
+
         for (CrudObject crudObject : serviceDescriptor.getCrudObjects()) {
             ObjectDescriptor objectDescriptor = model.findObject(crudObject.getName());
             Assert.check(objectDescriptor != null, "objectDescriptor != null");
